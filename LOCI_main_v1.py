@@ -34,15 +34,19 @@ class Base():
 
     def main(self):
         self.ser.ser.write(b'\x01')
-        eeprom_data = cre.calibration_restoration_EEPROM(self.ser.getListing())
-        print(eeprom_data.extractVDDParams())
-        print(eeprom_data.extractPTATParams()) ## Ask Sujay for missing code in matlab, why and how to access ram?
-        print(eeprom_data.extractGainCoef()) 
-        print(eeprom_data.extractTGCCoef()) 
-        print(eeprom_data.extractResConCoef()) 
-        print(eeprom_data.extractKsTaCoef())
-        print(eeprom_data.extractKsToCoef()) ## Ask Sujay why the corner temperatures (ct) are also calculated under this function in matlab
-        print(eeprom_data.extractCornerTemps())
+        eepromData = cre.calibration_restoration_EEPROM(self.ser.getListing())
+        print(eepromData.extractVDDParams())
+        print(eepromData.extractPTATParams()) ## Ask Sujay for missing code in matlab, why and how to access ram?
+        print(eepromData.extractGainCoef()) 
+        print(eepromData.extractTGCCoef()) 
+        print(eepromData.extractResConCoef()) 
+        print(eepromData.extractKsTaCoef())
+        print(eepromData.extractKsToCoef())
+        print(eepromData.extractCornerTemps())
+        print(eepromData.extractPixSens())
+        print(eepromData.extractPixOff()) ## Ask Sujay whether results are okay even though they're way higher than in max 10^2 (10^4) 
+        print(eepromData.extractKtaCoef())
+        print(eepromData.extractKvCoef())
 
 if __name__ == '__main__':
     b = Base() 
