@@ -1,4 +1,5 @@
-## Everything is rounded to integers, if any floating points are deemed necessary please make changes
+## Not optimized, numpy could be used for example but given the small number of data points I deemed this to be unnecessary for now
+
 ROWS = 24
 COLS = 32
 
@@ -156,7 +157,7 @@ class calibration_restoration_EEPROM:
         offset = [] # Calculate the sensitivity for each pixel in the IR array
         for i in range(ROWS):
             for j in range(COLS):
-                l = 32 * i + j
+                l = COLS * i + j
                 offset.append((int(self._mlxData[64 + l], 16) & 64512) / pow(2,10))
                 if offset[l] > 31:
                     offset[l] -= 64
@@ -165,7 +166,105 @@ class calibration_restoration_EEPROM:
         return offset
 
     def extractKtaCoef(self):
-        pass
+        kTas1 = ((int(self._mlxData[56], 16) & 240) / pow(2,4)) + 8
+        kTas2 = int(self._mlxData[56], 16) & 15
+
+        kTa = []
+        for i in range(ROWS):
+            for j in range(COLS):
+                l = COLS * i + j
+                kTa.append((int(self._mlxData[64 + l], 16) & 14) / 2)
+                if kTa[l] > 3:
+                    kTa[l] -= 8
+                if i % 2 == 0 and j % 2 == 0:
+                    kTaRC = (int(self._mlxData[54], 16) & 65280) / pow(2,8)
+                elif i % 2 == 1 and j % 2 == 0:
+                    kTaRC = int(self._mlxData[54], 16) & 255
+                elif i % 2 == 0 and j % 2 == 1:
+                    kTaRC = (int(self._mlxData[55], 16) & 65280) / pow(2,8)
+                else:
+                    kTaRC = int(self._mlxData[55], 16) & 255
+                if kTaRC > 127:
+                    kTaRC -= 256
+                kTa[l] = (kTaRC + (kTa[l] * pow(2, kTas2))) / pow(2, kTas1)
+
+        return kTa
 
     def extractKvCoef(self):
-        pass
+        kVScale = (int(self._mlxData[56], 16) & 3840) / pow(2,8)
+
+        kV = []
+        for i in range(ROWS):
+            for j in range(COLS):
+                l = COLS * i + j
+                if i % 2 == 0 and j % 2 == 0:
+                    kV.append((int(self._mlxData[52], 16) & 61440) / pow(2,12))
+                elif i % 2 == 1 and j % 2 == 0:
+                    kV.append((int(self._mlxData[52], 16) & 3840) / pow(2,8))
+                elif i % 2 == 0 and j % 2 == 1:
+                    kV.append((int(self._mlxData[52], 16) & 240) / pow(2,4))
+                else:
+                    kV.append(int(self._mlxData[52], 16) & 15)
+                if kV[l] > 7:
+                    kV[l] -= 16
+                kV[l] = kV[l] / pow(2, kVScale)
+        
+        return kV
+    
+    def extractComPixSens(self):
+        aScaleCP = ((int(self._mlxData[32], 16) & 61440) / pow(2,12)) + 27
+        cpP1P0Ratio = (int(self._mlxData[57], 16) & 64512) / pow(2,10)
+        if cpP1P0Ratio > 31:
+            cpP1P0Ratio -= 64
+        
+        alphaCPSub0 = (int(self._mlxData[57], 16) & 1023) / pow(2, aScaleCP)
+        alphaCPSub1 = alphaCPSub0 * (1 + (cpP1P0Ratio / pow(2, 7)))
+
+        return alphaCPSub0, alphaCPSub1
+
+    def extractComPixOff(self):
+        offsetCPSub0 = int(self._mlxData[58], 16) & 1023
+        if offsetCPSub0 > 511:
+            offsetCPSub0 -= 1024
+        offsetCPSub1 = (int(self._mlxData[58], 16) & 64512) / pow(2,10)
+        if offsetCPSub1 > 31:
+            offsetCPSub1 -= 64
+        offsetCPSub1 += offsetCPSub0
+
+        return offsetCPSub0, offsetCPSub1
+
+    def extractKtaComPixCoef(self):
+        kTas1 = ((int(self._mlxData[56], 16) & 240) / pow(2,4)) + 8
+        kTaCP = int(self._mlxData[59], 16) & 255
+        if kTaCP > 127:
+            kTaCP -= 256
+        kTaCP /= pow(2, kTas1)
+
+        return kTaCP
+
+    def extractKvComPixCoef(self):
+        kVScale = (int(self._mlxData[56], 16) & 3840) / pow(2,8)
+        kVCP = (int(self._mlxData[59], 16) & 65280) / pow(2,8)
+        if kVCP > 127:
+            kVCP -= 256
+        kVCP /= pow(2, kVScale)
+
+        return kVCP
+
+    def extractChessCorrCoef(self):
+        ilChessC1 = int(self._mlxData[53], 16) & 63
+        if ilChessC1 > 31:
+            ilChessC1 -= 64
+        ilChessC1 /= pow(2, 4)
+
+        ilChessC2 = (int(self._mlxData[53], 16) & 1984) / pow(2,6)
+        if ilChessC2 > 15:
+            ilChessC2 -= 32
+        ilChessC2 /= 2
+
+        ilChessC3 = (int(self._mlxData[53], 16) & 63488) / pow(2,11)
+        if ilChessC3 > 15:
+            ilChessC3 -= 32
+        ilChessC3 /= pow(2,3)
+
+        return ilChessC1, ilChessC2, ilChessC3

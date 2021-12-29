@@ -47,6 +47,11 @@ class Base():
         print(eepromData.extractPixOff()) ## Ask Sujay whether results are okay even though they're way higher than in max 10^2 (10^4) 
         print(eepromData.extractKtaCoef())
         print(eepromData.extractKvCoef())
+        print(eepromData.extractComPixSens())
+        print(eepromData.extractComPixOff()) # Ask Sujay whether results are okay given that these differ from pixoff more than in example
+        print(eepromData.extractKvComPixCoef())
+        print(eepromData.extractKtaComPixCoef())
+        print(eepromData.extractChessCorrCoef())
 
 if __name__ == '__main__':
     b = Base() 
