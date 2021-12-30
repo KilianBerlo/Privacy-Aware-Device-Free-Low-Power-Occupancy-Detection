@@ -268,3 +268,55 @@ class calibration_restoration_EEPROM:
         ilChessC3 /= pow(2,3)
 
         return ilChessC1, ilChessC2, ilChessC3
+    
+    def extractDeviatingPix(self): # What is the reasoning behind this function?
+        pixCnt = 0
+        brokenPixCnt = 0
+        outlierPixCnt = 0
+        warn = 0
+        warning = 0
+        brokenPix = [65535] * 5
+        outlierPix = [65535] * 5
+
+        while pixCnt < 768 and brokenPixCnt < 5 and outlierPixCnt < 5:
+            if int(self._mlxData[pixCnt + 64], 16) == 0:
+                brokenPix[brokenPixCnt] = pixCnt
+                brokenPixCnt += 1
+            elif (int(self._mlxData[53], 16) & 1) == 0:
+                outlierPix[outlierPixCnt] = pixCnt
+                outlierPixCnt += 1
+            pixCnt += 1
+        
+        if brokenPixCnt > 5:
+            warn = -3
+        elif outlierPixCnt > 5:
+            warn = -4
+        elif (brokenPixCnt + outlierPixCnt) > 5:
+            warn = -5
+        else:
+            for i in range(brokenPixCnt):
+                for j in range(i+1,brokenPixCnt):
+                    warn = self._checkAdjacentPix(brokenPix[i],brokenPix[j])
+                    if not (warn == 0):
+                        warning = warn
+            for i in range(outlierPixCnt):
+                for j in range(i+1,outlierPixCnt):
+                    warn = self._checkAdjacentPix(outlierPix[i],outlierPix[j])
+                    if not (warn == 0):
+                        warning = warn 
+            for i in range(brokenPixCnt): #in the matlab code this also starts at 0, that shouldnt be possible right? Given the lists start at 1
+                for j in range(outlierPixCnt):
+                    warn = self._checkAdjacentPix(brokenPix[i],outlierPix[j])
+                    if not (warn == 0):
+                        warning = warn
+
+        return brokenPix, outlierPix, warning
+
+    def _checkAdjacentPix(self, pix1, pix2):
+        pixPosDif = pix1 - pix2
+        if (pixPosDif > -34 and pixPosDif < -30) or (pixPosDif > -2 and pixPosDif < 2) or (pixPosDif > 30 and pixPosDif < 34):
+            result = -6
+        else:
+            result = 0
+        
+        return result

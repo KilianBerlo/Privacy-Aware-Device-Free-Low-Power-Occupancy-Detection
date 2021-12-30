@@ -52,6 +52,7 @@ class Base():
         print(eepromData.extractKvComPixCoef())
         print(eepromData.extractKtaComPixCoef())
         print(eepromData.extractChessCorrCoef())
+        print(eepromData.extractDeviatingPix()) # Ask Sujay how he found the way to calculate these deviating pixels since the data sheet doesn't show
 
 if __name__ == '__main__':
     b = Base() 
