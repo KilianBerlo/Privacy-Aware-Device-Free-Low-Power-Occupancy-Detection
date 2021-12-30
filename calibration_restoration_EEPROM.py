@@ -1,5 +1,4 @@
 ## Not optimized, numpy could be used for example but given the small number of data points I deemed this to be unnecessary for now
-
 ROWS = 24
 COLS = 32
 
