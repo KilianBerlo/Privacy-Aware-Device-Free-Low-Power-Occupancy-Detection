@@ -1,4 +1,9 @@
 ## Not optimized, numpy could be used for example but given the small number of data points I deemed this to be unnecessary for now
+## All parameters are extracted according to the instructions in chapter 11 of the MLX90640-Datasheet-Melexis: 
+## https://www.mouser.com/datasheet/2/734/MLX90640-Datasheet-Melexis-1324357.pdf
+
+## TODO: QUESTIONS AT extractPTATParams, extractPixOff, extractComPixOff, extractDeviatingPix FUNCTIONS
+
 ROWS = 24
 COLS = 32
 
@@ -17,6 +22,7 @@ class calibration_restoration_EEPROM:
 
         return kVdd, vdd25
 
+    ## TODO: Some code is missing in the Matlab implementation, its the part where RAM is used, why can this be left out?
     def extractPTATParams(self):
         kVPTAT = (int(self._mlxData[50], 16) & 64512) / pow(2,10)
         if kVPTAT > 31: 
@@ -80,10 +86,10 @@ class calibration_restoration_EEPROM:
         step = ((int(self._mlxData[63], 16) & 12288) / pow(2,12)) * 10
 
         ct = []
-        ct.append(-40) # ct1
-        ct.append(0) #ct2
-        ct.append(((int(self._mlxData[63], 16) & 240) / pow(2,4)) * step) #ct3
-        ct.append(((int(self._mlxData[63], 16) & 3840) / pow(2,8)) * step + ct[2]) #ct4
+        ct.append(-40) ## corner 1 temperature
+        ct.append(0) ## corner 2 temperature
+        ct.append(((int(self._mlxData[63], 16) & 240) / pow(2,4)) * step) ## corner 3 temperature
+        ct.append(((int(self._mlxData[63], 16) & 3840) / pow(2,8)) * step + ct[2]) ## corner 4 temperature
 
         return ct
     
@@ -95,7 +101,8 @@ class calibration_restoration_EEPROM:
         accScaleRem = int(self._mlxData[32], 16) & 15
 
         accRow = []
-        for i in range(ROWS>>2): # Range from 0 to 5 since six EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
+        ## Range from 0 to 5 since six EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
+        for i in range(ROWS>>2): 
             accRow.append(int(self._mlxData[34 + i], 16) & 15)
             accRow.append((int(self._mlxData[34 + i], 16) & 240) / pow(2,4))
             accRow.append((int(self._mlxData[34 + i], 16) & 3840) / pow(2,8))
@@ -105,7 +112,8 @@ class calibration_restoration_EEPROM:
                 accRow[i] -= 16
         
         accCol = []
-        for j in range(COLS>>2): # Range from 0 to 7 since eight EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
+        ## Range from 0 to 7 since eight EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
+        for j in range(COLS>>2): 
             accCol.append(int(self._mlxData[40 + j], 16) & 15)
             accCol.append((int(self._mlxData[40 + j], 16) & 240) / pow(2,4))
             accCol.append((int(self._mlxData[40 + j], 16) & 3840) / pow(2,8))
@@ -114,7 +122,7 @@ class calibration_restoration_EEPROM:
             if accCol[j] > 7:
                 accCol[j] -= 16
 
-        alpha = [] # Calculate the sensitivity for each pixel in the IR array
+        alpha = [] 
         for i in range(ROWS):
             for j in range(COLS):
                 l = 32 * i + j
@@ -125,6 +133,7 @@ class calibration_restoration_EEPROM:
 
         return alpha
 
+    ## TODO: Are these results okay even though they're way bigger than in example (max 10^2 in example vs 10^4 here) 
     def extractPixOff(self):
         oavg = int(self._mlxData[17], 16)
         if oavg > 32767:
@@ -134,7 +143,8 @@ class calibration_restoration_EEPROM:
         occScaleRem = int(self._mlxData[16], 16) & 15
 
         occRow = []
-        for i in range(ROWS>>2): # Range from 0 to 5 since six EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
+        ## Range from 0 to 5 since six EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
+        for i in range(ROWS>>2): 
             occRow.append(int(self._mlxData[18 + i], 16) & 15)
             occRow.append((int(self._mlxData[18 + i], 16) & 240) / pow(2,4))
             occRow.append((int(self._mlxData[18 + i], 16) & 3840) / pow(2,8))
@@ -144,7 +154,8 @@ class calibration_restoration_EEPROM:
                 occRow[i] -= 16
 
         occCol = []
-        for j in range(COLS>>2): # Range from 0 to 7 since eight EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
+        ## Range from 0 to 7 since eight EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
+        for j in range(COLS>>2): 
             occCol.append(int(self._mlxData[24 + j], 16) & 15)
             occCol.append((int(self._mlxData[24 + j], 16) & 240) / pow(2,4))
             occCol.append((int(self._mlxData[24 + j], 16) & 3840) / pow(2,8))
@@ -153,7 +164,7 @@ class calibration_restoration_EEPROM:
             if occCol[j] > 7:
                 occCol[j] -= 16
 
-        offset = [] # Calculate the sensitivity for each pixel in the IR array
+        offset = []
         for i in range(ROWS):
             for j in range(COLS):
                 l = COLS * i + j
@@ -221,6 +232,7 @@ class calibration_restoration_EEPROM:
 
         return alphaCPSub0, alphaCPSub1
 
+    ## TODO: Results are okay given that these differ from pixoff more than in the example?
     def extractComPixOff(self):
         offsetCPSub0 = int(self._mlxData[58], 16) & 1023
         if offsetCPSub0 > 511:
@@ -268,7 +280,8 @@ class calibration_restoration_EEPROM:
 
         return ilChessC1, ilChessC2, ilChessC3
     
-    def extractDeviatingPix(self): # What is the reasoning behind this function?
+    ## TODO: What is the reasoning behind this function, cant find it in the datasheet?
+    def extractDeviatingPix(self): 
         pixCnt = 0
         brokenPixCnt = 0
         outlierPixCnt = 0
@@ -303,7 +316,7 @@ class calibration_restoration_EEPROM:
                     warn = self._checkAdjacentPix(outlierPix[i],outlierPix[j])
                     if not (warn == 0):
                         warning = warn 
-            for i in range(brokenPixCnt): #in the matlab code this also starts at 0, that shouldnt be possible right? Given the lists start at 1
+            for i in range(brokenPixCnt): ## TODO: In the matlab code this also starts at 0, that shouldnt be possible right? Given the lists start at 1 there
                 for j in range(outlierPixCnt):
                     warn = self._checkAdjacentPix(brokenPix[i],outlierPix[j])
                     if not (warn == 0):
