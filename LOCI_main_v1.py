@@ -1,83 +1,90 @@
-import threading
 import serial
 import binascii
 import calibration_restoration_EEPROM as cre
+import temperature_calculation as tc
 
-## TODO: TWO QUESTIONS AT extractDeviatingPix FUNCTION
-
-class recvData(threading.Thread):
+class Base():
     def __init__(self):
-        super(recvData, self).__init__()
-
         ## The received data is put in a list
-        self.databuffer = [] 
+        self._x1Data = [] 
+        self._x2Data = [] 
+        self._calData = {} 
+        self._frameData = [0 for a in range(835)] ## frame data is double the page data since two times page data is analysed to complete one (both subpages)
 
         ## Configure the serial connection (the port might differ per machine)
         self.ser = serial.Serial(port='/dev/ttyUSB0',baudrate=256000,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS)
 
-    def run(self):    
-        ## Write the 0x01 hex value to the sensor so it knows it can send EEPROM data
+    def read_EEPROM(self):
         self.ser.write(b'\x01')          
-        while len(self.databuffer) < 832: ## TEMPORARY For now just for 0x01, when 0x02 is going to be read it is to be changed to be continuous
+        while len(self._x1Data) < 832: ## TEMPORARY For now just for 0x01, when 0x02 is going to be read it is to be changed to be continuous
             read = self.ser.read(self.ser.inWaiting())
             ## Check whether there is data being read
             if read != b'':
                 ## Upon receival, immediately extract the correct hex values
                 for i in range(0, len(binascii.hexlify(read).decode()), 4):
-                    self.databuffer.append(binascii.hexlify(read).decode()[i: i+4])
-        ## TEMPORARY Close the connection after the 0x01 info is received
-        self.ser.close()
-    
-    ## Get values for 0x01 instruction of MLX
-    def getData(self):
-        while len(self.databuffer) != 832:
-            pass
-        return self.databuffer
+                    self._x1Data.append(binascii.hexlify(read).decode()[i: i+4])
+        return self._x1Data
 
-class Base():
-    def __init__(self):
-        ## Initialize a thread for receiving the data
-        self.ser = recvData() 
-        ## Run the data receival thread
-        self.ser.start() 
-
-    ## Check whether the devicedata is correct
-    def _checkEEPROMValid(self, x1Data):
-        deviceSelect = int(x1Data[10], 16) & 64
+    def MLX90640_ExtractParameters(self, eepromData):
+        ## Check whether the devicedata is correct
+        deviceSelect = int(self._x1Data[10], 16) & 64
         if deviceSelect == 0:
             error = 0
         else:
             error = -7
-        
-        return error
 
-    def main(self):
-        ## Get the data to be used for the calibration restoration of the EEPROM data
-        x1Data = self.ser.getData()
-        print(x1Data)
-        eepromData = cre.calibration_restoration_EEPROM(x1Data)
-        error = self._checkEEPROMValid(x1Data)
-
-        ## TEMPORARY Results of the calibration restoration of the EEPROM data (for checking whether the results are correct)
+        ## Results of the calibration restoration of the EEPROM data
         if error == 0:
-            print(eepromData.extractVDDParams())
-            print(eepromData.extractPTATParams()) 
-            print(eepromData.extractGainCoef()) 
-            print(eepromData.extractTGCCoef()) 
-            print(eepromData.extractResConCoef()) 
-            print(eepromData.extractKsTaCoef())
-            print(eepromData.extractKsToCoef())
-            print(eepromData.extractCornerTemps())
-            print(eepromData.extractPixSens())
-            print(eepromData.extractPixOff()) 
-            print(eepromData.extractKtaCoef())
-            print(eepromData.extractKvCoef())
-            print(eepromData.extractComPixSens())
-            print(eepromData.extractComPixOff()) 
-            print(eepromData.extractKvComPixCoef())
-            print(eepromData.extractKtaComPixCoef())
-            print(eepromData.extractChessCorrCoef())
-            print(eepromData.extractDeviatingPix()) 
+            self._calData['kVdd'], self._calData['vdd25'] = eepromData.extractVDDParams()
+            self._calData['kvPTAT'], self._calData['ktPTAT'], self._calData['vPTAT25'], self._calData['alphaPTAT'] = eepromData.extractPTATParams()
+            self._calData['gainEE'] = eepromData.extractGainCoef()
+            self._calData['tgc'] = eepromData.extractTGCCoef()
+            self._calData['resolutionEE'] = eepromData.extractResConCoef()
+            self._calData['KsTa'] = eepromData.extractKsTaCoef()
+            self._calData['KsTo'] = eepromData.extractKsToCoef()
+            self._calData['ct'] = eepromData.extractCornerTemps()
+            self._calData['alpha'] = eepromData.extractPixSens()
+            self._calData['offset'] = eepromData.extractPixOff()
+            self._calData['kta'] = eepromData.extractKtaCoef()
+            self._calData['kv'] = eepromData.extractKvCoef()
+            self._calData['cpAlpha'] = eepromData.extractComPixSens()
+            self._calData['cpOffset'] = eepromData.extractComPixOff()
+            self._calData['cpKv'] = eepromData.extractKvComPixCoef()
+            self._calData['cpKta'] = eepromData.extractKtaComPixCoef()
+            self._calData['calibrationModeEE'] = eepromData.extractCalMode()
+            self._calData['ilChessC'] = eepromData.extractChessCorrCoef()
+            dev_val = eepromData.extractDeviatingPix()
+            self._calData['brokenPixels'] = dev_val[0]
+            self._calData['outlierPixels'] = dev_val[1]
+            self._calData['warning'] = dev_val[2]
+            return self._calData
+        else:
+            return 1
+
+    def main(self):   
+        deviceParams = self.MLX90640_ExtractParameters(cre.calibration_restoration_EEPROM(self.read_EEPROM()))
+        ### TODO: In the main.c file it looks like the data is already ordered in the right pixel format (so after one another and not chess), is this correct or should it still be done here as well?
+        # self.ser.write(b'\x02')
+        # counting = 0
+        # while(counting < 2):
+        #     while len(self._x2Data) < 451:
+        #         read = self.ser.read(self.ser.inWaiting())
+        #         ## Check whether there is data being read
+        #         if read != b'':
+        #             ## Upon receival, immediately extract the correct hex values
+        #             for i in range(0, len(binascii.hexlify(read).decode()), 4):
+        #                 self._x2Data.append(binascii.hexlify(read).decode()[i: i+4])
+        #     self._frameData = tc.pixel_value_calculation(self._x2Data, self._frameData, deviceParams).getFrameData()
+        #     self._x2Data.clear()
+        #     print(self._frameData)
+        #     counting+=1
+        print(deviceParams)
+        
+            # print(self._frameData)
+#         ## DO calculations on the 902 bytes of data 
+#         ## Collect the next 902 bytes of data
+#         ## Keep doing this process till the connection has to be closed
+
 
 if __name__ == '__main__':
     b = Base() 

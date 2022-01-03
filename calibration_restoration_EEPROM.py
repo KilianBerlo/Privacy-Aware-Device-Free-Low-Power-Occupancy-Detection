@@ -2,7 +2,7 @@
 ## All parameters are extracted according to the instructions in chapter 11 of the MLX90640-Datasheet-Melexis: 
 ## https://www.mouser.com/datasheet/2/734/MLX90640-Datasheet-Melexis-1324357.pdf
 
-## TODO: QUESTIONS AT extractPTATParams, extractPixOff, extractComPixOff, extractDeviatingPix FUNCTIONS
+## TODO: QUESTIONS AT extractPTATParams, extractPixOff, extractComPixOff, extractCalMode, extractDeviatingPix FUNCTIONS
 
 ROWS = 24
 COLS = 32
@@ -22,7 +22,6 @@ class calibration_restoration_EEPROM:
 
         return kVdd, vdd25
 
-    ## TODO: Some code is missing in the Matlab implementation, its the part where RAM is used, why can this be left out?
     def extractPTATParams(self):
         kVPTAT = (int(self._mlxData[50], 16) & 64512) / pow(2,10)
         if kVPTAT > 31: 
@@ -261,6 +260,13 @@ class calibration_restoration_EEPROM:
         kVCP /= pow(2, kVScale)
 
         return kVCP
+
+    ## TODO: What does this do? I have no clue what the value should be since I don't have an example
+    def extractCalMode(self):
+        calMode = (int(self._mlxData[10], 16) & 2048) / pow(2,4)
+        calMode = int(calMode) ^ 128
+
+        return calMode
 
     def extractChessCorrCoef(self):
         ilChessC1 = int(self._mlxData[53], 16) & 63
