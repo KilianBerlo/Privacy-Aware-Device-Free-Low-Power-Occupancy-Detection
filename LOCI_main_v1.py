@@ -16,13 +16,14 @@ class Base():
 
     def read_EEPROM(self):
         self.ser.write(b'\x01')          
-        while len(self._x1Data) < 832: ## TEMPORARY For now just for 0x01, when 0x02 is going to be read it is to be changed to be continuous
-            read = self.ser.read(self.ser.inWaiting())
-            ## Check whether there is data being read
-            if read != b'':
-                ## Upon receival, immediately extract the correct hex values
-                for i in range(0, len(binascii.hexlify(read).decode()), 4):
-                    self._x1Data.append(binascii.hexlify(read).decode()[i: i+4])
+        # while len(self._x1Data) < 832: ## TEMPORARY For now just for 0x01, when 0x02 is going to be read it is to be changed to be continuous
+        read = self.ser.read(1664)
+        ## Check whether there is data being read
+        ## Upon receival, immediately extract the correct hex values
+        for i in range(0, len(binascii.hexlify(read).decode()), 4):
+            self._x1Data.append(binascii.hexlify(read).decode()[i: i+4])
+        self.ser.reset_output_buffer()
+        self.ser.reset_input_buffer()
         return self._x1Data
 
     def MLX90640_ExtractParameters(self, eepromData):
@@ -61,30 +62,26 @@ class Base():
         else:
             return 1
 
-    def main(self):   
+    def main(self):
         deviceParams = self.MLX90640_ExtractParameters(cre.calibration_restoration_EEPROM(self.read_EEPROM()))
-        ### TODO: In the main.c file it looks like the data is already ordered in the right pixel format (so after one another and not chess), is this correct or should it still be done here as well?
-        # self.ser.write(b'\x02')
-        # counting = 0
-        # while(counting < 2):
-        #     while len(self._x2Data) < 451:
-        #         read = self.ser.read(self.ser.inWaiting())
-        #         ## Check whether there is data being read
-        #         if read != b'':
-        #             ## Upon receival, immediately extract the correct hex values
-        #             for i in range(0, len(binascii.hexlify(read).decode()), 4):
-        #                 self._x2Data.append(binascii.hexlify(read).decode()[i: i+4])
-        #     self._frameData = tc.pixel_value_calculation(self._x2Data, self._frameData, deviceParams).getFrameData()
-        #     self._x2Data.clear()
-        #     print(self._frameData)
-        #     counting+=1
-        print(deviceParams)
-        
-            # print(self._frameData)
-#         ## DO calculations on the 902 bytes of data 
-#         ## Collect the next 902 bytes of data
-#         ## Keep doing this process till the connection has to be closed
 
+        ###################################################
+        ### TEST PHASE, NOT YET GETTING DESIRED OUTCOME ###
+        ###################################################
+        counting = 0
+        self.ser.write(b'\x02')
+        while(counting < 20):
+            read = self.ser.read(903)
+            ## Upon receival, immediately extract the correct hex values
+            for i in range(2, len(binascii.hexlify(read).decode()), 4):
+                self._x2Data.append(binascii.hexlify(read).decode()[i: i+4])
+        #     self._frameData = tc.pixel_value_calculation(self._x2Data, self._frameData, deviceParams).getFrameData()
+            # print(self._x2Data)
+            self._x2Data.clear()
+            counting+=1
+        # print(test)
+        # print(test1)
+        # print(deviceParams)
 
 if __name__ == '__main__':
     b = Base() 
