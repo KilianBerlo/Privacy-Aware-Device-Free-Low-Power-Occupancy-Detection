@@ -1,3 +1,4 @@
+from struct import calcsize
 import serial
 import binascii
 import calibration_restoration_EEPROM as cre
@@ -6,29 +7,29 @@ import temperature_calculation as tc
 class Base():
     def __init__(self):
         ## The received data is put in a list
-        self._x1Data = [] 
-        self._x2Data = [] 
+        self._dataEE = []  
         self._calData = {} 
-        self._frameData = [0 for a in range(835)] ## frame data is double the page data since two times page data is analysed to complete one (both subpages)
 
         ## Configure the serial connection (the port might differ per machine)
         self.ser = serial.Serial(port='/dev/ttyUSB0',baudrate=256000,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS)
+        ## Cleaning the buffers to make sure there is nothing in it
+        self.ser.reset_output_buffer()
+        self.ser.reset_input_buffer()
 
     def read_EEPROM(self):
         self.ser.write(b'\x01')          
-        # while len(self._x1Data) < 832: ## TEMPORARY For now just for 0x01, when 0x02 is going to be read it is to be changed to be continuous
         read = self.ser.read(1664)
-        ## Check whether there is data being read
         ## Upon receival, immediately extract the correct hex values
         for i in range(0, len(binascii.hexlify(read).decode()), 4):
-            self._x1Data.append(binascii.hexlify(read).decode()[i: i+4])
+            self._dataEE.append(binascii.hexlify(read).decode()[i: i+4])
+        ## Cleaning the buffers to make sure there is nothing in it
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
-        return self._x1Data
+        return self._dataEE
 
     def MLX90640_ExtractParameters(self, eepromData):
         ## Check whether the devicedata is correct
-        deviceSelect = int(self._x1Data[10], 16) & 64
+        deviceSelect = int(self._dataEE[10], 16) & 64
         if deviceSelect == 0:
             error = 0
         else:
@@ -64,24 +65,14 @@ class Base():
 
     def main(self):
         deviceParams = self.MLX90640_ExtractParameters(cre.calibration_restoration_EEPROM(self.read_EEPROM()))
-
-        ###################################################
-        ### TEST PHASE, NOT YET GETTING DESIRED OUTCOME ###
-        ###################################################
-        counting = 0
-        self.ser.write(b'\x02')
-        while(counting < 20):
-            read = self.ser.read(903)
-            ## Upon receival, immediately extract the correct hex values
-            for i in range(2, len(binascii.hexlify(read).decode()), 4):
-                self._x2Data.append(binascii.hexlify(read).decode()[i: i+4])
-        #     self._frameData = tc.pixel_value_calculation(self._x2Data, self._frameData, deviceParams).getFrameData()
-            # print(self._x2Data)
-            self._x2Data.clear()
-            counting+=1
-        # print(test)
-        # print(test1)
         # print(deviceParams)
+
+        count = 0
+        self.ser.write(b'\x02')
+        while count < 4:
+            _dataTemp = tc.temperature_calculation(self.ser, deviceParams).getPixData()
+            print(_dataTemp)
+            count += 1
 
 if __name__ == '__main__':
     b = Base() 

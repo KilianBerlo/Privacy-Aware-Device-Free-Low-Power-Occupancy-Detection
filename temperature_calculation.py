@@ -1,35 +1,41 @@
 import math as m
+import binascii
+import serial
 
 EMISSIVITY = 32
 TA_SHIFT = 8
 
-class pixel_value_calculation:
-    def __init__(self, pageData, deviceParams):
-        self._pageData = pageData
+class temperature_calculation:
+    def __init__(self, ser, deviceParams):
+        self._pageData = []
         self._frameData = [0 for a in range(835)]
         self._tempData = []
         self._deviceParams = deviceParams
-        self._ADC
+        self.ser = ser
+        self._ADC = 0
 
-####################################################
-### TO BE REFINED, NOT YET WORKING APPROPRIATELY ###
-####################################################
     def getFrameData(self):
-        self._ADC = int(self._pageData[450], 16)
+        read = self.ser.read(902)
         index = 384
-        if int(self._pageData[449], 16) == 0:
+        ## Upon receival, immediately extract the correct hex values
+        for i in range(2, len(binascii.hexlify(read).decode()), 4):
+            self._pageData.append(int(binascii.hexlify(read).decode()[i: i+4], 16))
+
+        self._ADC = self._pageData[450]
+        
+        if self._pageData[449] == 0:
             for i in range(384):
-                location = ((i - 1) * 2) + 1 + (m.floor((i - 1) / 16) % 2)
+                location = (i * 2) + (m.floor(i / 16) % 2)
                 self._frameData[location] = self._pageData[i]
         else:
             for i in range(384):
-                location = ((i - 1) * 2) + 2 - (m.floor((i - 1) / 16) % 2)
+                location = (i * 2) + 1 - (m.floor(i / 16) % 2)
                 self._frameData[location] = self._pageData[i]
         for i in range(768, 835):
             self._frameData[i] = self._pageData[index]
             index += 1
-
-        return self._frameData
+        
+        self._pageData.clear()
 
 ### NOT YET TESTED GIVEN UNKNOWN FRAME DATA EXTRACTION ###
 
@@ -38,14 +44,15 @@ class pixel_value_calculation:
         if vdd > 32767:
             vdd -= 65536
 
-        resRAM = (int(self._frameData[832], 16) & 3072) / m.pow(2,10)
+        resRAM = (self._frameData[832] & 3072) / m.pow(2,10)
+        
         resCor = pow(2, self._deviceParams['calibrationModeEE']) / m.pow(2, resRAM)
         vdd = ((resCor * vdd - self._deviceParams['vdd25']) / self._deviceParams['kVdd']) + 3.3
 
         return vdd
 
     def getTa(self):
-        vdd = self.getVDD
+        vdd = self.getVDD()
         ptat = self._frameData[800]
         if ptat > 32767:
             ptat -= 65536
@@ -63,13 +70,15 @@ class pixel_value_calculation:
         return ta
     
     def getGain(self):
-        gain = self._frameData(778)
+        gain = self._frameData[778]
         if gain > 32767:
             gain -= 65536
         
         gain = self._deviceParams['gainEE'] / gain
 
-    def getIRDataCP(self, gain, ta, vdd, mode):
+        return gain
+
+    def getIRDataCP(self, gain, ta, vdd, mode): 
         ## Compensate the gain of the CP pixel
         irDataCP0 = self._frameData[776]
         if irDataCP0 > 32767:
@@ -91,8 +100,6 @@ class pixel_value_calculation:
         
         return [irDataCP0, irDataCP1]
 
-
-
     def getPixData(self):
         for i in range(2):
             self.getFrameData()
@@ -111,18 +118,18 @@ class pixel_value_calculation:
             alphaCorrR.append(alphaCorrR[2] * (1 + self._deviceParams['KsTo'][3] * (self._deviceParams['ct'][3] - self._deviceParams['ct'][2])))
 
             gain = self.getGain()
-            mode = (int(self._frameData[832], 16) & 4096) / pow(2,5)
+            mode = (self._frameData[832] & 4096) / pow(2,5)
             irDataCP = self.getIRDataCP(gain, ta, vdd, mode)
             
             for p in range(768):
-                ilPattern = m.floor((p - 1) / 32) - m.floor((p - 1) / 64) * 2
-                chessPattern = ilPattern ^ ((p - 1) - (m.floor((p - 1) / 2)) * 2)
-                conversionPattern = (m.floor(((p - 1) + 2) / 4) - m.floor(((p - 1) + 3) / 4) + m.floor(((p - 1) + 1) / 4) - m.floor((p - 1) / 4)) * (1 - 2 * ilPattern)
+                ilPattern = m.floor(p / 32) - m.floor(p / 64) * 2
+                chessPattern = ilPattern ^ (p - (m.floor(p / 2)) * 2)
+                conversionPattern = (m.floor((p + 2) / 4) - m.floor((p + 3) / 4) + m.floor((p + 1) / 4) - m.floor(p / 4)) * (1 - 2 * ilPattern)
                 if mode == 0:
                     pattern = ilPattern
                 else:
-                    pattern = chessPattern
-                if pattern == self._frameData[833]:
+                    pattern = chessPattern    
+                if pattern == subPage:
                     ## Calculate the gain compensation on each pixel
                     irData = self._frameData[p]
                     if irData > 32767:
