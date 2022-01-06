@@ -1,6 +1,6 @@
 import math as m
 import binascii
-import serial
+import struct
 
 EMISSIVITY = 32
 TA_SHIFT = 8
@@ -15,11 +15,15 @@ class temperature_calculation:
         self._ADC = 0
 
     def getFrameData(self):
-        read = self.ser.read(902)
+        # read = self.ser.read(902)
+        read = self.ser.read_until(b'\r\n')
         index = 384
         ## Upon receival, immediately extract the correct hex values
-        for i in range(2, len(binascii.hexlify(read).decode()), 4):
-            self._pageData.append(int(binascii.hexlify(read).decode()[i: i+4], 16))
+        for i in range(0, len(read) - 4, 2):
+            self._pageData.append((struct.unpack('<H', read[i:i+2])[0]))
+        print(self._pageData)
+        print(len(self._pageData))
+        print(self._pageData[449])
 
         self._ADC = self._pageData[450]
         
@@ -137,15 +141,24 @@ class temperature_calculation:
                     
                     irData = irData * gain
 
+                    ############################################
+                    ## DEBUGGING: irData gets negative which it shouldn't, whats the reason? find out, might be gain or offset wrong calculation? or perhaps irDataCP values
+                    ############################################
+
                     ## Calculate the IR data compensation with offset, VDD and Ta
+                    print(irData)
                     irData = irData - self._deviceParams['offset'][p] * (1 + self._deviceParams['kta'][p] * (ta - 25)) * (1 + self._deviceParams['kv'][p] * (vdd - 3.3))
+                    print(irData)
                     if not (mode == self._deviceParams['calibrationModeEE']):
                         irData = irData + self._deviceParams['ilChessC'][2] * (2 * ilPattern - 1) - self._deviceParams['ilChessC'][1] * conversionPattern
-                    
-                    ## IR data emmisivity data compensation
-                    irData /= EMISSIVITY
-                    irData = irData - self._deviceParams['tgc'] * irDataCP[subPage]
-
+                    print(irData)
+                    ## IR data emmisivity data compensation 
+                    irData /= EMISSIVITY 
+                    print(irData)
+                    irData = irData - self._deviceParams['tgc'] * irDataCP[subPage] 
+                    print(irData)
+                    print(self._deviceParams['tgc'])
+                    print(irDataCP[subPage])
                     ## Normalizing to sensitivity
                     alphaCompensated = (self._deviceParams['alpha'][p] - self._deviceParams['tgc'] * self._deviceParams['cpAlpha'][subPage]) * (1 + self._deviceParams['KsTa'] * (ta - 25))
                     
@@ -156,13 +169,17 @@ class temperature_calculation:
 
                     ## Determine the range we are in
                     if to < self._deviceParams['ct'][1]:
-                        r = 1
+                        r = 0
                     elif to < self._deviceParams['ct'][2]:
-                        r = 2
+                        r = 1
                     elif to < self._deviceParams['ct'][3]:
-                        r = 3
+                        r = 2
                     else:
-                        r = 4
+                        r = 3
+
+                    #############################################
+                    ## Temperatures wayyyy to high, check why that could be ##
+                    ###############################################
 
                     ## Extended To range calculation
                     to = m.sqrt(m.sqrt(irData / (alphaCompensated * alphaCorrR[r] * (1 + self._deviceParams['KsTo'][r] * (to - self._deviceParams['ct'][r]))) + taTr)) - 273.15

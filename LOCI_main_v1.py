@@ -66,10 +66,9 @@ class Base():
     def main(self):
         deviceParams = self.MLX90640_ExtractParameters(cre.calibration_restoration_EEPROM(self.read_EEPROM()))
         # print(deviceParams)
-
         count = 0
         self.ser.write(b'\x02')
-        while count < 4:
+        while count < 30:
             _dataTemp = tc.temperature_calculation(self.ser, deviceParams).getPixData()
             print(_dataTemp)
             count += 1
