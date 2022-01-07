@@ -12,100 +12,100 @@ class calibration_restoration_EEPROM:
         self._mlxData = mlxData
     
     def extractVDDParams(self):
-        kVdd = (int(self._mlxData[51], 16) & 65280) / pow(2,8)
+        kVdd = (self._mlxData[51] & 65280) / 256
         if kVdd > 127:
             kVdd = kVdd - 256
         kVdd *= 32
         
-        vdd25 = int(self._mlxData[51], 16) & 255
+        vdd25 = self._mlxData[51] & 255
         vdd25 = (vdd25 - 256) * 32 - 8192
 
         return kVdd, vdd25
 
     def extractPTATParams(self):
-        kVPTAT = (int(self._mlxData[50], 16) & 64512) / pow(2,10)
+        kVPTAT = (self._mlxData[50] & 64512) / 1024
         if kVPTAT > 31: 
             kVPTAT -= 64
-        kVPTAT /= pow(2,12)
+        kVPTAT /= 4096
 
-        kTPTAT = int(self._mlxData[50], 16) & 1023
+        kTPTAT = self._mlxData[50] & 1023
         if kTPTAT > 511:
             kTPTAT -= 1024
-        kTPTAT >>= 3
+        kTPTAT /= 8
 
-        vPTAT25 = int(self._mlxData[49], 16)
+        vPTAT25 = self._mlxData[49]
         
-        alphaPTAT = ((int(self._mlxData[16], 16) & 61440) / pow(2,14)) + 8
+        alphaPTAT = ((self._mlxData[16] & 61440) / 16384) + 8
 
         return kVPTAT, kTPTAT, vPTAT25, alphaPTAT
 
     def extractGainCoef(self):
-        gain = (int(self._mlxData[48], 16))
+        gain = (self._mlxData[48])
         if gain > 32767:
             gain -= 65536
         
         return gain
 
     def extractTGCCoef(self):
-        tgc = int(self._mlxData[60], 16) & 255
+        tgc = self._mlxData[60] & 255
         if tgc > 127:
             tgc -= 256
-        tgc >>= 5
+        tgc /= 32
 
         return tgc
 
     def extractResConCoef(self):
-        resolution = (int(self._mlxData[56], 16) & 12288) / pow(2,12)
+        resolution = (self._mlxData[56] & 12288) / 16384
 
         return resolution
     
     def extractKsTaCoef(self):
-        ksTa = (int(self._mlxData[60], 16) & 65280) / pow(2,8)
+        ksTa = (self._mlxData[60] & 65280) / 256
         if ksTa > 127:
             ksTa -= 256
-        ksTa /= pow(2,13)
+        ksTa /= 8192
 
         return ksTa
 
     def extractKsToCoef(self):
-        ksToScale = (int(self._mlxData[63], 16) & 15) + 8
+        ksToScale = (self._mlxData[63] & 15) + 8
 
         ksTo = []
-        ksTo.append(int(self._mlxData[61], 16) & 255)
-        ksTo.append((int(self._mlxData[61], 16) & 65280) / pow(2,8))
-        ksTo.append(int(self._mlxData[62], 16) & 255)
-        ksTo.append((int(self._mlxData[62], 16) & 255) / pow(2,8))
+        ksTo.append(self._mlxData[61] & 255)
+        ksTo.append((self._mlxData[61] & 65280) / 256)
+        ksTo.append(self._mlxData[62] & 255)
+        ksTo.append((self._mlxData[62] & 255) / 256) ## result is different than in the example data is shown, rest is the same (-0.0002), this one is 1.12e-6
         for i in range(4):
             if ksTo[i] > 127:
                 ksTo[i] -= 256
-            ksTo[i] /= pow(2,ksToScale)
+            ksTo[i] /= pow(2, ksToScale)
         return ksTo
 
     def extractCornerTemps(self):
-        step = ((int(self._mlxData[63], 16) & 12288) / pow(2,12)) * 10
+        step = ((self._mlxData[63] & 12288) / 4096) * 10
 
         ct = []
         ct.append(-40) ## corner 1 temperature
         ct.append(0) ## corner 2 temperature
-        ct.append(((int(self._mlxData[63], 16) & 240) / pow(2,4)) * step) ## corner 3 temperature
-        ct.append(((int(self._mlxData[63], 16) & 3840) / pow(2,8)) * step + ct[2]) ## corner 4 temperature
+        ct.append(((self._mlxData[63] & 240) / 16) * step) ## corner 3 temperature
+        ct.append(((self._mlxData[63] & 3840) / 256) * step + ct[2]) ## corner 4 temperature
 
         return ct
     
     def extractPixSens(self):
-        aRef = int(self._mlxData[33], 16)
-        aScale = ((int(self._mlxData[32], 16) & 61440) / pow(2,12)) + 30
-        accScaleRow = (int(self._mlxData[32], 16) & 3840) / pow(2,8)
-        accScaleCol = (int(self._mlxData[32], 16) & 240) / pow(2,4)
-        accScaleRem = int(self._mlxData[32], 16) & 15
+        aRef = self._mlxData[33]
+        aScale = ((self._mlxData[32] & 61440) / 4096) + 30
+        accScaleRow = (self._mlxData[32] & 3840) / 256
+        accScaleCol = (self._mlxData[32] & 240) / 16
+        accScaleRem = self._mlxData[32] & 15
 
         accRow = []
         ## Range from 0 to 5 since six EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
         for i in range(ROWS>>2): 
-            accRow.append(int(self._mlxData[34 + i], 16) & 15)
-            accRow.append((int(self._mlxData[34 + i], 16) & 240) / pow(2,4))
-            accRow.append((int(self._mlxData[34 + i], 16) & 3840) / pow(2,8))
-            accRow.append((int(self._mlxData[34 + i], 16) & 61440) / pow(2,12))
+            accRow.append(self._mlxData[34 + i] & 15)
+            accRow.append((self._mlxData[34 + i] & 240) / 16)
+            accRow.append((self._mlxData[34 + i] & 3840) / 256)
+            accRow.append((self._mlxData[34 + i] & 61440) / 4096)
         for i in range(ROWS):
             if accRow[i] > 7:
                 accRow[i] -= 16
@@ -113,10 +113,10 @@ class calibration_restoration_EEPROM:
         accCol = []
         ## Range from 0 to 7 since eight EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
         for j in range(COLS>>2): 
-            accCol.append(int(self._mlxData[40 + j], 16) & 15)
-            accCol.append((int(self._mlxData[40 + j], 16) & 240) / pow(2,4))
-            accCol.append((int(self._mlxData[40 + j], 16) & 3840) / pow(2,8))
-            accCol.append((int(self._mlxData[40 + j], 16) & 61440) / pow(2,12))
+            accCol.append(self._mlxData[40 + j] & 15)
+            accCol.append((self._mlxData[40 + j] & 240) / 16)
+            accCol.append((self._mlxData[40 + j] & 3840) / 256)
+            accCol.append((self._mlxData[40 + j] & 61440) / 4096)
         for j in range(COLS):
             if accCol[j] > 7:
                 accCol[j] -= 16
@@ -125,29 +125,29 @@ class calibration_restoration_EEPROM:
         for i in range(ROWS):
             for j in range(COLS):
                 l = 32 * i + j
-                alpha.append((int(self._mlxData[64 + l], 16) & 1008) / pow(2,4))
+                alpha.append((self._mlxData[64 + l] & 1008) / 16)
                 if alpha[l] > 31:
                     alpha[l] -= 64
-                alpha[l] = (aRef + (accRow[i] * pow(2,accScaleRow)) + (accCol[j] * pow(2,accScaleCol)) + (alpha[l] * pow(2,accScaleRem))) / pow(2,aScale)
+                alpha[l] = (aRef + (accRow[i] * pow(2, accScaleRow)) + (accCol[j] * pow(2, accScaleCol)) + (alpha[l] * pow(2, accScaleRem))) / pow(2, aScale)
 
         return alpha
 
     ## TODO: Are these results okay even though they're way bigger than in example (max 10^2 in example vs 10^4 here) 
     def extractPixOff(self):
-        oavg = int(self._mlxData[17], 16)
+        oavg = self._mlxData[17]
         if oavg > 32767:
             oavg -= 65536
-        occScaleRow = (int(self._mlxData[16], 16) & 3840) / pow(2,8)
-        occScaleCol = (int(self._mlxData[16], 16) & 240) / pow(2,4)
-        occScaleRem = int(self._mlxData[16], 16) & 15
+        occScaleRow = (self._mlxData[16] & 3840) / 256
+        occScaleCol = (self._mlxData[16] & 240) / 16
+        occScaleRem = self._mlxData[16] & 15
 
         occRow = []
         ## Range from 0 to 5 since six EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
         for i in range(ROWS>>2): 
-            occRow.append(int(self._mlxData[18 + i], 16) & 15)
-            occRow.append((int(self._mlxData[18 + i], 16) & 240) / pow(2,4))
-            occRow.append((int(self._mlxData[18 + i], 16) & 3840) / pow(2,8))
-            occRow.append((int(self._mlxData[18 + i], 16) & 61440) / pow(2,12))
+            occRow.append(self._mlxData[18 + i] & 15)
+            occRow.append((self._mlxData[18 + i] & 240) / 16)
+            occRow.append((self._mlxData[18 + i] & 3840) / 256)
+            occRow.append((self._mlxData[18 + i] & 61440) / 4096)
         for i in range(ROWS):
             if occRow[i] > 7:
                 occRow[i] -= 16
@@ -155,10 +155,10 @@ class calibration_restoration_EEPROM:
         occCol = []
         ## Range from 0 to 7 since eight EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
         for j in range(COLS>>2): 
-            occCol.append(int(self._mlxData[24 + j], 16) & 15)
-            occCol.append((int(self._mlxData[24 + j], 16) & 240) / pow(2,4))
-            occCol.append((int(self._mlxData[24 + j], 16) & 3840) / pow(2,8))
-            occCol.append((int(self._mlxData[24 + j], 16) & 61440) / pow(2,12))
+            occCol.append(self._mlxData[24 + j] & 15)
+            occCol.append((self._mlxData[24 + j] & 240) / 16)
+            occCol.append((self._mlxData[24 + j] & 3840) / 256)
+            occCol.append((self._mlxData[24 + j] & 61440) / 4096)
         for j in range(COLS):
             if occCol[j] > 7:
                 occCol[j] -= 16
@@ -167,7 +167,7 @@ class calibration_restoration_EEPROM:
         for i in range(ROWS):
             for j in range(COLS):
                 l = COLS * i + j
-                offset.append((int(self._mlxData[64 + l], 16) & 64512) / pow(2,10))
+                offset.append((self._mlxData[64 + l] & 64512) / 1024)
                 if offset[l] > 31:
                     offset[l] -= 64
                 offset[l] = oavg + (occRow[i] * pow(2, occScaleRow)) + (occCol[j] * pow(2, occScaleCol)) + (offset[l] * pow(2, occScaleRem))
@@ -175,24 +175,24 @@ class calibration_restoration_EEPROM:
         return offset
 
     def extractKtaCoef(self):
-        kTas1 = ((int(self._mlxData[56], 16) & 240) / pow(2,4)) + 8
-        kTas2 = int(self._mlxData[56], 16) & 15
+        kTas1 = ((self._mlxData[56] & 240) / 16) + 8
+        kTas2 = self._mlxData[56] & 15
 
         kTa = []
         for i in range(ROWS):
             for j in range(COLS):
                 l = COLS * i + j
-                kTa.append((int(self._mlxData[64 + l], 16) & 14) / 2)
+                kTa.append((self._mlxData[64 + l] & 14) / 2)
                 if kTa[l] > 3:
                     kTa[l] -= 8
                 if i % 2 == 0 and j % 2 == 0:
-                    kTaRC = (int(self._mlxData[54], 16) & 65280) / pow(2,8)
+                    kTaRC = (self._mlxData[54] & 65280) / 256
                 elif i % 2 == 1 and j % 2 == 0:
-                    kTaRC = int(self._mlxData[54], 16) & 255
+                    kTaRC = self._mlxData[54] & 255
                 elif i % 2 == 0 and j % 2 == 1:
-                    kTaRC = (int(self._mlxData[55], 16) & 65280) / pow(2,8)
+                    kTaRC = (self._mlxData[55] & 65280) / 256
                 else:
-                    kTaRC = int(self._mlxData[55], 16) & 255
+                    kTaRC = self._mlxData[55] & 255
                 if kTaRC > 127:
                     kTaRC -= 256
                 kTa[l] = (kTaRC + (kTa[l] * pow(2, kTas2))) / pow(2, kTas1)
@@ -200,20 +200,20 @@ class calibration_restoration_EEPROM:
         return kTa
 
     def extractKvCoef(self):
-        kVScale = (int(self._mlxData[56], 16) & 3840) / pow(2,8)
+        kVScale = (self._mlxData[56] & 3840) / 256
 
         kV = []
         for i in range(ROWS):
             for j in range(COLS):
                 l = COLS * i + j
                 if i % 2 == 0 and j % 2 == 0:
-                    kV.append((int(self._mlxData[52], 16) & 61440) / pow(2,12))
+                    kV.append((self._mlxData[52] & 61440) / 4096)
                 elif i % 2 == 1 and j % 2 == 0:
-                    kV.append((int(self._mlxData[52], 16) & 3840) / pow(2,8))
+                    kV.append((self._mlxData[52] & 3840) / 256)
                 elif i % 2 == 0 and j % 2 == 1:
-                    kV.append((int(self._mlxData[52], 16) & 240) / pow(2,4))
+                    kV.append((self._mlxData[52] & 240) / 16)
                 else:
-                    kV.append(int(self._mlxData[52], 16) & 15)
+                    kV.append(self._mlxData[52] & 15)
                 if kV[l] > 7:
                     kV[l] -= 16
                 kV[l] = kV[l] / pow(2, kVScale)
@@ -221,22 +221,22 @@ class calibration_restoration_EEPROM:
         return kV
     
     def extractComPixSens(self):
-        aScaleCP = ((int(self._mlxData[32], 16) & 61440) / pow(2,12)) + 27
-        cpP1P0Ratio = (int(self._mlxData[57], 16) & 64512) / pow(2,10)
+        aScaleCP = ((self._mlxData[32] & 61440) / 4096) + 27
+        cpP1P0Ratio = (self._mlxData[57] & 64512) / 1024
         if cpP1P0Ratio > 31:
             cpP1P0Ratio -= 64
         
-        alphaCPSub0 = (int(self._mlxData[57], 16) & 1023) / pow(2, aScaleCP)
-        alphaCPSub1 = alphaCPSub0 * (1 + (cpP1P0Ratio / pow(2, 7)))
+        alphaCPSub0 = (self._mlxData[57] & 1023) / pow(2, aScaleCP)
+        alphaCPSub1 = alphaCPSub0 * (1 + (cpP1P0Ratio / 128))
 
         return alphaCPSub0, alphaCPSub1
 
     ## TODO: Results are okay given that these differ from pixoff more than in the example?
     def extractComPixOff(self):
-        offsetCPSub0 = int(self._mlxData[58], 16) & 1023
+        offsetCPSub0 = self._mlxData[58] & 1023
         if offsetCPSub0 > 511:
             offsetCPSub0 -= 1024
-        offsetCPSub1 = (int(self._mlxData[58], 16) & 64512) / pow(2,10)
+        offsetCPSub1 = (self._mlxData[58] & 64512) / 1024
         if offsetCPSub1 > 31:
             offsetCPSub1 -= 64
         offsetCPSub1 += offsetCPSub0
@@ -244,8 +244,8 @@ class calibration_restoration_EEPROM:
         return offsetCPSub0, offsetCPSub1
 
     def extractKtaComPixCoef(self):
-        kTas1 = ((int(self._mlxData[56], 16) & 240) / pow(2,4)) + 8
-        kTaCP = int(self._mlxData[59], 16) & 255
+        kTas1 = ((self._mlxData[56] & 240) / 16) + 8
+        kTaCP = self._mlxData[59] & 255
         if kTaCP > 127:
             kTaCP -= 256
         kTaCP /= pow(2, kTas1)
@@ -253,8 +253,8 @@ class calibration_restoration_EEPROM:
         return kTaCP
 
     def extractKvComPixCoef(self):
-        kVScale = (int(self._mlxData[56], 16) & 3840) / pow(2,8)
-        kVCP = (int(self._mlxData[59], 16) & 65280) / pow(2,8)
+        kVScale = (self._mlxData[56] & 3840) / 256
+        kVCP = (self._mlxData[59] & 65280) / 256
         if kVCP > 127:
             kVCP -= 256
         kVCP /= pow(2, kVScale)
@@ -263,26 +263,26 @@ class calibration_restoration_EEPROM:
 
     ## TODO: What does this do? I have no clue what the value should be since I don't have an example
     def extractCalMode(self):
-        calMode = (int(self._mlxData[10], 16) & 2048) / pow(2,4)
+        calMode = (self._mlxData[10] & 2048) / 16
         calMode = int(calMode) ^ 128
 
         return calMode
 
     def extractChessCorrCoef(self):
-        ilChessC1 = int(self._mlxData[53], 16) & 63
+        ilChessC1 = self._mlxData[53] & 63
         if ilChessC1 > 31:
             ilChessC1 -= 64
-        ilChessC1 /= pow(2, 4)
+        ilChessC1 /= 16
 
-        ilChessC2 = (int(self._mlxData[53], 16) & 1984) / pow(2,6)
+        ilChessC2 = (self._mlxData[53] & 1984) / 64
         if ilChessC2 > 15:
             ilChessC2 -= 32
         ilChessC2 /= 2
 
-        ilChessC3 = (int(self._mlxData[53], 16) & 63488) / pow(2,11)
+        ilChessC3 = (self._mlxData[53] & 63488) / 2048
         if ilChessC3 > 15:
             ilChessC3 -= 32
-        ilChessC3 /= pow(2,3)
+        ilChessC3 /= 8
 
         return ilChessC1, ilChessC2, ilChessC3
     
@@ -297,10 +297,10 @@ class calibration_restoration_EEPROM:
         outlierPix = [65535] * 5
 
         while pixCnt < 768 and brokenPixCnt < 5 and outlierPixCnt < 5:
-            if int(self._mlxData[pixCnt + 64], 16) == 0:
+            if self._mlxData[pixCnt + 64] == 0:
                 brokenPix[brokenPixCnt] = pixCnt
                 brokenPixCnt += 1
-            elif (int(self._mlxData[53], 16) & 1) == 0:
+            elif (self._mlxData[53] & 1) == 0:
                 outlierPix[outlierPixCnt] = pixCnt
                 outlierPixCnt += 1
             pixCnt += 1

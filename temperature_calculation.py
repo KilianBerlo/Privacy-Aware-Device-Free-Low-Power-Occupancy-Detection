@@ -1,5 +1,4 @@
 import math as m
-import binascii
 import struct
 
 EMISSIVITY = 32
@@ -18,12 +17,10 @@ class temperature_calculation:
         # read = self.ser.read(902)
         read = self.ser.read_until(b'\r\n')
         index = 384
+
         ## Upon receival, immediately extract the correct hex values
         for i in range(0, len(read) - 4, 2):
-            self._pageData.append((struct.unpack('<H', read[i:i+2])[0]))
-        print(self._pageData)
-        print(len(self._pageData))
-        print(self._pageData[449])
+            self._pageData.append((struct.unpack('<H', read[i:i+2])[0])) 
 
         self._ADC = self._pageData[450]
         
@@ -41,16 +38,13 @@ class temperature_calculation:
         
         self._pageData.clear()
 
-### NOT YET TESTED GIVEN UNKNOWN FRAME DATA EXTRACTION ###
-
     def getVDD(self):
         vdd = self._frameData[810]
         if vdd > 32767:
             vdd -= 65536
 
-        resRAM = (self._frameData[832] & 3072) / m.pow(2,10)
-        
-        resCor = pow(2, self._deviceParams['calibrationModeEE']) / m.pow(2, resRAM)
+        resRAM = (self._frameData[832] & 3072) / 1024
+        resCor = pow(2, self._deviceParams['resolutionEE']) / m.pow(2, resRAM)
         vdd = ((resCor * vdd - self._deviceParams['vdd25']) / self._deviceParams['kVdd']) + 3.3
 
         return vdd
@@ -66,7 +60,7 @@ class temperature_calculation:
             ptatArt -= 65536
 
         ptatArt += (ptat * self._deviceParams['alphaPTAT'])
-        ptatArt = (ptat / ptatArt) * m.pow(2, 18)
+        ptatArt = (ptat / ptatArt) * 262144
 
         ta = (ptatArt / (1 + self._deviceParams['kvPTAT'] * (vdd - 3.3))) - self._deviceParams['vPTAT25']
         ta = (ta / self._deviceParams['ktPTAT']) + 25
@@ -104,7 +98,7 @@ class temperature_calculation:
         
         return [irDataCP0, irDataCP1]
 
-    def getPixData(self):
+    def getPixData(self):        
         for i in range(2):
             self.getFrameData()
             subPage = self._frameData[833]
@@ -122,7 +116,7 @@ class temperature_calculation:
             alphaCorrR.append(alphaCorrR[2] * (1 + self._deviceParams['KsTo'][3] * (self._deviceParams['ct'][3] - self._deviceParams['ct'][2])))
 
             gain = self.getGain()
-            mode = (self._frameData[832] & 4096) / pow(2,5)
+            mode = (self._frameData[832] & 4096) / 32
             irDataCP = self.getIRDataCP(gain, ta, vdd, mode)
             
             for p in range(768):
@@ -141,24 +135,14 @@ class temperature_calculation:
                     
                     irData = irData * gain
 
-                    ############################################
-                    ## DEBUGGING: irData gets negative which it shouldn't, whats the reason? find out, might be gain or offset wrong calculation? or perhaps irDataCP values
-                    ############################################
-
                     ## Calculate the IR data compensation with offset, VDD and Ta
-                    print(irData)
                     irData = irData - self._deviceParams['offset'][p] * (1 + self._deviceParams['kta'][p] * (ta - 25)) * (1 + self._deviceParams['kv'][p] * (vdd - 3.3))
-                    print(irData)
                     if not (mode == self._deviceParams['calibrationModeEE']):
                         irData = irData + self._deviceParams['ilChessC'][2] * (2 * ilPattern - 1) - self._deviceParams['ilChessC'][1] * conversionPattern
-                    print(irData)
+
                     ## IR data emmisivity data compensation 
                     irData /= EMISSIVITY 
-                    print(irData)
                     irData = irData - self._deviceParams['tgc'] * irDataCP[subPage] 
-                    print(irData)
-                    print(self._deviceParams['tgc'])
-                    print(irDataCP[subPage])
                     ## Normalizing to sensitivity
                     alphaCompensated = (self._deviceParams['alpha'][p] - self._deviceParams['tgc'] * self._deviceParams['cpAlpha'][subPage]) * (1 + self._deviceParams['KsTa'] * (ta - 25))
                     
@@ -176,10 +160,6 @@ class temperature_calculation:
                         r = 2
                     else:
                         r = 3
-
-                    #############################################
-                    ## Temperatures wayyyy to high, check why that could be ##
-                    ###############################################
 
                     ## Extended To range calculation
                     to = m.sqrt(m.sqrt(irData / (alphaCompensated * alphaCorrR[r] * (1 + self._deviceParams['KsTo'][r] * (to - self._deviceParams['ct'][r]))) + taTr)) - 273.15
