@@ -1,6 +1,9 @@
 import math as m
 import struct
+import numpy as np
 
+ROWS = 24
+COLS = 32
 EMISSIVITY = 32
 TA_SHIFT = 8
 
@@ -8,7 +11,7 @@ class temperature_calculation:
     def __init__(self, ser, deviceParams):
         self._pageData = []
         self._frameData = [0 for a in range(835)]
-        self._tempData = []
+        self._tempData = np.empty(768)
         self._deviceParams = deviceParams
         self.ser = ser
         self._ADC = 0
@@ -150,6 +153,7 @@ class temperature_calculation:
                     sx = self._deviceParams['KsTo'][1] * m.sqrt(m.sqrt(sx))
                     to = m.sqrt(irData / (alphaCompensated * (1 - self._deviceParams['KsTo'][1] * 273.15) + sx) + taTr)
                     to = m.sqrt(to) - 273.15
+                    
                     ## Determine the range we are in
                     if to < self._deviceParams['ct'][1]:
                         r = 0
@@ -162,6 +166,6 @@ class temperature_calculation:
 
                     ## Extended To range calculation
                     to = m.sqrt(m.sqrt(irData / (alphaCompensated * alphaCorrR[r] * (1 + self._deviceParams['KsTo'][r] * (to - self._deviceParams['ct'][r]))) + taTr)) - 273.15
-                    self._tempData.append(to)
-        
+                    self._tempData[p] = to
+                    
         return self._tempData
