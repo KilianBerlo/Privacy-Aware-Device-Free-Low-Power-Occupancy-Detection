@@ -14,6 +14,7 @@ class temperature_calculation:
         self._ADC = 0
 
     def getFrameData(self):
+        self._pageData.clear()
         # read = self.ser.read(902)
         read = self.ser.read_until(b'\r\n')
         index = 384
@@ -35,8 +36,6 @@ class temperature_calculation:
         for i in range(768, 835):
             self._frameData[i] = self._pageData[index]
             index += 1
-        
-        self._pageData.clear()
 
     def getVDD(self):
         vdd = self._frameData[810]
@@ -132,14 +131,15 @@ class temperature_calculation:
                     irData = self._frameData[p]
                     if irData > 32767:
                         irData -= 65536
-                    
                     irData = irData * gain
 
                     ## Calculate the IR data compensation with offset, VDD and Ta
                     irData = irData - self._deviceParams['offset'][p] * (1 + self._deviceParams['kta'][p] * (ta - 25)) * (1 + self._deviceParams['kv'][p] * (vdd - 3.3))
+
+                    #irData = irData - app.structVar.offset(pixelNumber)*(1 + app.structVar.kta(pixelNumber)*(Ta - 25))*(1 + app.structVar.kv(pixelNumber)*(vdd - 3.3));
+
                     if not (mode == self._deviceParams['calibrationModeEE']):
                         irData = irData + self._deviceParams['ilChessC'][2] * (2 * ilPattern - 1) - self._deviceParams['ilChessC'][1] * conversionPattern
-
                     ## IR data emmisivity data compensation 
                     irData /= EMISSIVITY 
                     irData = irData - self._deviceParams['tgc'] * irDataCP[subPage] 
@@ -150,7 +150,6 @@ class temperature_calculation:
                     sx = self._deviceParams['KsTo'][1] * m.sqrt(m.sqrt(sx))
                     to = m.sqrt(irData / (alphaCompensated * (1 - self._deviceParams['KsTo'][1] * 273.15) + sx) + taTr)
                     to = m.sqrt(to) - 273.15
-
                     ## Determine the range we are in
                     if to < self._deviceParams['ct'][1]:
                         r = 0
