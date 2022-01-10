@@ -4,14 +4,14 @@ import numpy as np
 
 ROWS = 24
 COLS = 32
-EMISSIVITY = 32
+EMISSIVITY = 0.95
 TA_SHIFT = 8
 
 class temperature_calculation:
     def __init__(self, ser, deviceParams):
         self._pageData = []
         self._frameData = [0 for a in range(835)]
-        self._tempData = np.empty(768)
+        self._tempData = np.zeros(768)
         self._deviceParams = deviceParams
         self.ser = ser
         self._ADC = 0
@@ -64,7 +64,7 @@ class temperature_calculation:
         ptatArt += (ptat * self._deviceParams['alphaPTAT'])
         ptatArt = (ptat / ptatArt) * 262144
 
-        ta = (ptatArt / (1 + self._deviceParams['kvPTAT'] * (vdd - 3.3))) - self._deviceParams['vPTAT25']
+        ta = ptatArt / (1 + self._deviceParams['kvPTAT'] * (vdd - 3.3)) - self._deviceParams['vPTAT25']
         ta = (ta / self._deviceParams['ktPTAT']) + 25
 
         return ta
