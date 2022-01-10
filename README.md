@@ -7,6 +7,7 @@ How to count the amount of people in the frame?
 How to follow the people in the frame?
 
 Real time?
+
 https://stackoverflow.com/questions/25385216/python-real-time-varying-heat-map-plotting
 
 https://stackoverflow.com/questions/7663263/reading-real-time-values-with-pyserial-while-plotting
