@@ -89,7 +89,9 @@ class Base():
     
     def show_Heatmap(self):
         ### IMAGE PROCESSING ###
+        # Small video
         plt.ion()
+
         fig, ax = plt.subplots()
         im = ax.imshow(self._imData, 'jet')
 
@@ -97,7 +99,12 @@ class Base():
         cbar = ax.figure.colorbar(im, ax=ax)
         cbar.ax.set_ylabel("", rotation=-90, va="bottom")
 
-        for i in range(50):
+        # # One image only
+        # fig.tight_layout()
+        # plt.show()
+
+        # Small video
+        for i in range(10):
             self.calculate_PixTemp()
             im.set_data(self._imData)
             fig.canvas.flush_events()
