@@ -2,7 +2,7 @@
 ## All parameters are extracted according to the instructions in chapter 11 of the MLX90640-Datasheet-Melexis: 
 ## https://www.mouser.com/datasheet/2/734/MLX90640-Datasheet-Melexis-1324357.pdf
 
-## TODO: QUESTIONS AT extractPTATParams, extractPixOff, extractComPixOff, extractCalMode, extractDeviatingPix FUNCTIONS
+## TODO: QUESTIONS AT extractDeviatingPix
 import math as m
 
 ROWS = 24
@@ -133,8 +133,7 @@ class calibration_restoration_EEPROM:
                 alpha[l] = (aRef + (accRow[i] * pow(2, accScaleRow)) + (accCol[j] * pow(2, accScaleCol)) + (alpha[l] * pow(2, accScaleRem))) / pow(2, aScale)
 
         return alpha
-
-    ## TODO: Are these results okay even though they're way bigger than in example (max 10^2 in example vs 10^4 here) 
+ 
     def extractPixOff(self):
         oavg = self._mlxData[17]
         if oavg > 32767:
@@ -277,7 +276,6 @@ class calibration_restoration_EEPROM:
 
         return kVCP
 
-    ## TODO: What does this do? I have no clue what the value should be since I don't have an example
     def extractCalMode(self):
         calMode = (self._mlxData[10] & 2048) / 16
         calMode = int(calMode) ^ 128
