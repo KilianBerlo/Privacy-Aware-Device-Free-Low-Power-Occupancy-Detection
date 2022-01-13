@@ -79,18 +79,15 @@ class Base():
             return self._calData
         else:
             return 1
-
-    def main(self):
-        deviceParams = self.MLX90640_ExtractParameters(cre.calibration_restoration_EEPROM(self.read_EEPROM()))
-        # print(deviceParams)
-        self.ser.write(b'\x02')
-        dataTemp = tc.temperature_calculation(self.ser, deviceParams).getPixData()
-        # dataTemp = tcx.temperature_calculation_xmpl(deviceParams).getPixData()
+    
+    def calculate_PixTemp(self):
+        dataTemp = tc.temperature_calculation(self.ser, self._calData).getPixData()
+        # dataTemp = tcx.temperature_calculation_xmpl(self._calData).getPixData()
         for i in range(ROWS):
             for j in range(COLS):
                 self._imData[i,j] = dataTemp[(i*32) + j]
-
-        
+    
+    def show_Heatmap(self):
         ### IMAGE PROCESSING ###
         plt.ion()
         fig, ax = plt.subplots()
@@ -101,16 +98,18 @@ class Base():
         cbar.ax.set_ylabel("", rotation=-90, va="bottom")
 
         for i in range(50):
-            print(".", end="")
-            dataTemp = tc.temperature_calculation(self.ser, deviceParams).getPixData()
-            # dataTemp = tcx.temperature_calculation_xmpl(deviceParams).getPixData()
-            for i in range(ROWS):
-                for j in range(COLS):
-                    self._imData[i,j] = dataTemp[(i*32) + j]
+            self.calculate_PixTemp()
             im.set_data(self._imData)
             fig.canvas.flush_events()
 
-        print()
+    def main(self):
+        self.read_EEPROM()
+        self.MLX90640_ExtractParameters(cre.calibration_restoration_EEPROM(self._dataEE))
+
+        self.ser.write(b'\x02')
+        self.calculate_PixTemp()
+
+        self.show_Heatmap()
 
 if __name__ == '__main__':
     b = Base() 
