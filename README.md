@@ -1,7 +1,11 @@
 # LOCI
 Privacy-aware, Device-free, Low-power Smart Localization of Multiple Persons using IR Sensors
 
+Thermophile data working!
 ![test2](https://user-images.githubusercontent.com/28041072/148819953-7e8df87c-ce72-47ea-802f-5fc139934020.png)
+
+Thermophile data with bicubic interpolation applied:
+![test3](https://user-images.githubusercontent.com/28041072/149578223-973084d1-0d5c-458b-ade7-704ea1a64406.png)
 
 How to count the amount of people in the frame?
 How to follow the people in the frame?
