@@ -9,22 +9,28 @@ TA_SHIFT = 8
 
 class temperature_calculation:
     def __init__(self, ser, deviceParams):
-        self._pageData = []
-        self._frameData = [0 for a in range(835)]
+        self._pageData = np.empty(451)
+        self._frameData = np.zeros(835)
         self._tempData = np.zeros(768)
         self._deviceParams = deviceParams
         self.ser = ser
         self._ADC = 0
+        # For saving frames
+        self._i = 0
 
     def getFrameData(self):
-        self._pageData.clear()
         # read = self.ser.read(902)
         read = self.ser.read_until(b'\r\n')
         index = 384
-
+        
         ## Upon receival, immediately extract the correct hex values
         for i in range(0, len(read) - 4, 2):
-            self._pageData.append((struct.unpack('<H', read[i:i+2])[0])) 
+            self._pageData[int(i/2)] = (struct.unpack('<H', read[i:i+2])[0])
+
+        # For saving frames
+        print("subpage " + str(self._i) + ":\n")
+        print(self._pageData)
+        self._i += 1
 
         self._ADC = self._pageData[450]
         
@@ -39,6 +45,8 @@ class temperature_calculation:
         for i in range(768, 835):
             self._frameData[i] = self._pageData[index]
             index += 1
+
+        self._frameData = self._frameData.astype(int)
 
     def getVDD(self):
         vdd = self._frameData[810]
