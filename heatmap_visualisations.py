@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 class heatmap_visualisations:
     def __init__(self, imageData):
@@ -8,7 +9,7 @@ class heatmap_visualisations:
         plt.ion()
         
         fig, ax = plt.subplots()
-        im = ax.imshow(self.imageData, interpolation='bicubic', cmap='jet')
+        im = ax.imshow(self.imageData, interpolation='bicubic', cmap='hot') ##interpolation='bicubic', 
 
         # Create colorbar
         cbar = ax.figure.colorbar(im, ax=ax)
@@ -22,7 +23,7 @@ class heatmap_visualisations:
 
         plt.axis('off')
 
-        im = ax.imshow(self.imageData, interpolation='bicubic', cmap='jet')
+        im = ax.imshow(self.imageData, cmap='hot') ##interpolation='bicubic', 
 
         ## For comparison ##   
         # methods = ['bicubic', None]

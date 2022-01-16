@@ -27,9 +27,10 @@ class temperature_calculation:
         for i in range(0, len(read) - 4, 2):
             self._pageData[int(i/2)] = (struct.unpack('<H', read[i:i+2])[0])
 
-        # For saving frames
-        print("subpage " + str(self._i) + ":\n")
-        print(self._pageData)
+        # # For saving frames
+        framefile = open('test_data/newfigure.txt', 'a')
+        framefile.write("subpage " + str(self._i) + ":\n" + str(self._pageData))
+        framefile.close()
         self._i += 1
 
         self._ADC = self._pageData[450]

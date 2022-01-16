@@ -89,13 +89,20 @@ class Base():
         for i in range(ROWS):
             for j in range(COLS):
                 self._imData[i,j] = dataTemp[(i*32) + j]
+        
+        # For saving frames
+        # framefile = open('test_data/figureTemp.txt', 'w')
+        # framefile.write("temperature data: " + str(self._imData) + "\n")
+        # framefile.close()
           
     def main(self):
         ## PIR SETUP DATA ##
         self.read_EEPROM()
         self.MLX90640_ExtractParameters(cre.calibration_restoration_EEPROM(self._dataEE))
-        # For saving frames
-        print("eepromdata: " + str(self._dataEE) + "\n")
+        # # For saving frames
+        # framefile = open('test_data/newfigure.txt', 'w')
+        # framefile.write("eepromdata: " + str(self._dataEE) + "\n")
+        # framefile.close()
 
         ## FRAME DATA ##
         if self.live:
@@ -104,13 +111,13 @@ class Base():
         self.calculate_PixTemp()
 
         # # VISUALISATION ##
-        # fig, im = hv.heatmap_visualisations(self._imData).show_HeatmapVid()
-        # for i in range(50):
-        #     self.calculate_PixTemp()
-        #     im.set_data(self._imData)
-        #     fig.canvas.flush_events()
+        fig, im = hv.heatmap_visualisations(self._imData).show_HeatmapVid()
+        for i in range(50):
+            self.calculate_PixTemp()
+            im.set_data(self._imData)
+            fig.canvas.flush_events()
 
-        hv.heatmap_visualisations(self._imData).show_HeatmapImg()
+        # hv.heatmap_visualisations(self._imData).show_HeatmapImg()
 
 if __name__ == '__main__':
     b = Base() 
