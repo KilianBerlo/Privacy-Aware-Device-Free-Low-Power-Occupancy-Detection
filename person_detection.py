@@ -4,7 +4,8 @@ class person_detection:
     def __init__(self, figure):
         self.figure = figure
 
-    def contour_detection(self):    
+    def contour_detection(self): 
+        imagedef = cv2.imread(self.figure)
         image = cv2.imread(self.figure, cv2.IMREAD_GRAYSCALE)
         
         ## BLACK AND WHITE
@@ -15,8 +16,8 @@ class person_detection:
         print("The Total Number of People in the Image = ")
         ##command len used to calculate the number of contours/people in the image
         print (str(len(contours)))
-        cv2.drawContours(image, contours, -1,(0,0,0),3)
+        cv2.drawContours(imagedef, contours, -1,(0,0,0),3)
 
-        cv2.imshow('Image', image)
+        cv2.imshow('Image', imagedef)
         cv2.waitKey(0)
         cv2.destroyAllWindows()

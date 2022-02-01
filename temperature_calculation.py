@@ -174,7 +174,9 @@ class temperature_calculation:
                         r = 3
 
                     ## Extended To range calculation
-                    to = m.sqrt(m.sqrt(irData / (alphaCompensated * alphaCorrR[r] * (1 + self._deviceParams['KsTo'][r] * (to - self._deviceParams['ct'][r]))) + taTr)) - 273.15
+                    # to = m.sqrt(m.sqrt(irData / (alphaCompensated * alphaCorrR[r] * (1 + self._deviceParams['KsTo'][r] * (to - self._deviceParams['ct'][r]))) + taTr)) - 273.15
+                    ## Relative temp calculation
+                    to = ((irData / alphaCompensated) + taTr) * m.pow(10,-9)
                     self._tempData[p] = to
                     
         return self._tempData
