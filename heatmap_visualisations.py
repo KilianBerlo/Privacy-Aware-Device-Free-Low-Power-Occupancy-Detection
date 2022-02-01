@@ -301,13 +301,13 @@ class heatmap_visualisations:
         plt.ion()
         
         fig, ax = plt.subplots()
-        im = ax.imshow(self.imageData, interpolation='bicubic', cmap='hot') ##interpolation='bicubic', 
+        im = ax.imshow(np.subtract(self.imageData, self.backgroundTempDel), interpolation='bicubic', cmap='hot') ##interpolation='bicubic', 
 
         # Create colorbar
         cbar = ax.figure.colorbar(im, ax=ax)
         cbar.ax.set_ylabel("", rotation=-90, va="bottom")
 
-        return fig, im
+        return fig, im, self.backgroundTempDel
 
 
     def show_HeatmapImg(self):     

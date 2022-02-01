@@ -257,10 +257,10 @@ class Base():
 
         ## VISUALISATION ##
         if VID == True:
-            fig, im = hv.heatmap_visualisations(self._imData).show_HeatmapVid()
+            fig, im, bg = hv.heatmap_visualisations(self._imData).show_HeatmapVid()
             for i in range(50):
                 self.calculate_PixTemp()
-                im.set_data(self._imData)
+                im.set_data(np.subtract(self._imData, bg))
                 fig.canvas.flush_events()
         else:
             hv.heatmap_visualisations(self._imData).show_HeatmapImg()
