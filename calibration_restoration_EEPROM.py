@@ -1,8 +1,6 @@
-## Not optimized, numpy could be used for example but given the small number of data points I deemed this to be unnecessary for now
 ## All parameters are extracted according to the instructions in chapter 11 of the MLX90640-Datasheet-Melexis: 
 ## https://www.mouser.com/datasheet/2/734/MLX90640-Datasheet-Melexis-1324357.pdf
 
-## TODO: QUESTIONS AT extractDeviatingPix
 import math as m
 
 ROWS = 24
@@ -300,7 +298,6 @@ class calibration_restoration_EEPROM:
 
         return ilChessC1, ilChessC2, ilChessC3
     
-    ## TODO: What is the reasoning behind this function, cant find it in the datasheet?
     def extractDeviatingPix(self): 
         pixCnt = 0
         brokenPixCnt = 0
@@ -336,7 +333,7 @@ class calibration_restoration_EEPROM:
                     warn = self._checkAdjacentPix(outlierPix[i],outlierPix[j])
                     if not (warn == 0):
                         warning = warn 
-            for i in range(brokenPixCnt): ## TODO: In the matlab code this also starts at 0, that shouldnt be possible right? Given the lists start at 1 there
+            for i in range(brokenPixCnt):
                 for j in range(outlierPixCnt):
                     warn = self._checkAdjacentPix(brokenPix[i],outlierPix[j])
                     if not (warn == 0):

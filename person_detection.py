@@ -4,7 +4,7 @@ class person_detection:
     def __init__(self, figure):
         self.figure = figure
 
-    def contour_detection(self): 
+    def contour_detection(self, waitkey): 
         imagedef = cv2.imread(self.figure)
         image = cv2.imread(self.figure, cv2.IMREAD_GRAYSCALE)
         
@@ -19,5 +19,7 @@ class person_detection:
         cv2.drawContours(imagedef, contours, -1,(0,0,0),3)
 
         cv2.imshow('Image', imagedef)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        cv2.waitKey(waitkey)
+        
+        if waitkey == 0:
+            cv2.destroyAllWindows()

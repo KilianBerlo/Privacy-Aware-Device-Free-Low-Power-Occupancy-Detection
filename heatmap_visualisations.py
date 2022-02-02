@@ -1,12 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import person_detection as pd
-
-FIGURE = 'test_data/newfigure.jpg'
 
 class heatmap_visualisations:
     def __init__(self, imageData):
         self.imageData = imageData
+        # Background at home
         self.backgroundTempPar = np.array([[16.6709062, 17.09161765, 18.34942799, 19.41754636, 18.72287926, 19.04444098
 , 19.07292414, 19.23124633, 19.16825413, 19.1536862, 18.98958895, 19.42954068
 , 19.32348875, 19.25924788, 18.87288388, 19.0478082, 19.08957563, 19.1388281
@@ -151,6 +149,7 @@ class heatmap_visualisations:
 , 20.87538698, 20.95377927, 20.46009762, 20.9774684, 20.70515933, 20.67449891
 , 20.23841894, 20.44827457, 20.4384111, 20.54270623, 20.23164631, 20.7128333
 , 20.50287062, 21.25368099]])
+        # Background in Delft
         self.backgroundTempDel = np.array([[6.81739901, 6.97458325, 7.03065754, 7.1592326, 7.17752869, 7.19672629
 , 7.18108764, 7.20427243, 7.1974497, 7.2112473, 7.20096772, 7.24808941
 , 7.21321786, 7.20897333, 7.21574884, 7.22595269, 7.25683155, 7.19726041
@@ -298,31 +297,26 @@ class heatmap_visualisations:
 )
 
     def show_HeatmapVid(self):
+        # Only difference with show_HeatmapImg() is interactive mode activated and return values
         plt.ion()
-        
         fig, ax = plt.subplots()
-        im = ax.imshow(np.subtract(self.imageData, self.backgroundTempDel), interpolation='bicubic', cmap='hot') ##interpolation='bicubic', 
+        plt.axis('off')
+        im = ax.imshow(np.subtract(self.imageData, self.backgroundTempDel), interpolation='bicubic', cmap='hot')
+        plt.tight_layout()
 
         # Create colorbar
-        cbar = ax.figure.colorbar(im, ax=ax)
-        cbar.ax.set_ylabel("", rotation=-90, va="bottom")
+        # cbar = ax.figure.colorbar(im, ax=ax)
+        # cbar.ax.set_ylabel("", rotation=-90, va="bottom")
 
         return fig, im, self.backgroundTempDel
 
-
     def show_HeatmapImg(self):     
         fig, ax = plt.subplots()
-
         plt.axis('off')
-
-        # im = ax.imshow(self.imageData, cmap='hot') #, interpolation='bicubic', cmap='hot') 
-        im = ax.imshow(np.subtract(self.imageData, self.backgroundTempDel), interpolation='bicubic', cmap='hot') ##interpolation='bicubic', 
-
+        im = ax.imshow(np.subtract(self.imageData, self.backgroundTempDel), interpolation='bicubic', cmap='hot')
         plt.tight_layout()
-        plt.savefig(FIGURE, bbox_inches='tight',pad_inches = 0)
-        pd.person_detection(FIGURE).contour_detection()
 
-
+    # Used for comparing interpolation methods 
     def show_HMIntOpt(self):
         methods = [None, 'none', 'nearest', 'bilinear', 'bicubic', 'spline16', 'spline36', 'hanning', 'hamming', 'hermite', 'kaiser', 'quadric', 'catrom', 'gaussian', 'bessel', 'mitchell', 'sinc', 'lanczos']
 
