@@ -1,17 +1,19 @@
 import cv2
+import numpy as np
 
 class person_detection:
     def __init__(self, figure):
         self.figure = figure
 
     def contour_detection(self, waitkey): 
-        imagedef = cv2.imread(self.figure)
-        image = cv2.imread(self.figure, cv2.IMREAD_GRAYSCALE)
-        
-        ## BLACK AND WHITE
-        (ret, thresh) = cv2.threshold(image, 200, 255, 0)
+        imagedef = cv2.imread(self.figure)# Convert the BRG image to RGB
+        hsv_frame = cv2.cvtColor(imagedef, cv2.COLOR_BGR2HSV)
 
-        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        low = np.array([0, 0, 240])
+        high = np.array([175, 255, 255])
+        hsv_mask = cv2.inRange(hsv_frame, low, high)
+        
+        contours, hierarchy = cv2.findContours(hsv_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
         print("The Total Number of People in the Image = ")
         ##command len used to calculate the number of contours/people in the image
