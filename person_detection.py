@@ -13,7 +13,8 @@ class person_detection:
         high = np.array([175, 255, 255])
         hsv_mask = cv2.inRange(hsv_frame, low, high)
         
-        contours, hierarchy = cv2.findContours(hsv_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        ## takes all extreme outer contours only, so no contours inside other contours
+        contours, hierarchy = cv2.findContours(hsv_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
         print("The Total Number of People in the Image = ")
         ##command len used to calculate the number of contours/people in the image
