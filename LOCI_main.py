@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 # Set to True if serial data is used, set to False if database data is used
 LIVE = True
 # Set to True if real-time feedback is desired, set to False if a snapshot has to be analysed
-VID = True
+VID = False
 # Set to True if contours have to be shown in the real-time version, set to False if not
-CONTOUR = True
+CONTOUR = False
 
 # The number of rows and columns of the sensor
 ROWS = 24

@@ -6,10 +6,10 @@ class person_detection:
         self.figure = figure
 
     def contour_detection(self, waitkey): 
-        imagedef = cv2.imread(self.figure)# Convert the BRG image to RGB
+        imagedef = cv2.imread(self.figure)
         hsv_frame = cv2.cvtColor(imagedef, cv2.COLOR_BGR2HSV)
 
-        low = np.array([0, 0, 240])
+        low = np.array([0, 0, 220])
         high = np.array([175, 255, 255])
         hsv_mask = cv2.inRange(hsv_frame, low, high)
         
