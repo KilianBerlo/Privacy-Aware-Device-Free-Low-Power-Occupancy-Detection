@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "pvrarEMysHA0RJxEk9Wrp2AUuHJoEBYEI3OlvatunhdjKeWK4LRx+ZJ+1IukPJE/oedMlMkFnybTT8ZUPIDD0g==",
+  "dgSpecHash": "Mhw/gRY8OhBmK82VHsq65yRW6apT+jnOx/vtjfCO0txxl+EfWoAPXYf2yQc7wxzBSS0Si0jf8IJZQb6Nn4g75w==",
   "success": true,
   "projectFilePath": "/home/kilian/Desktop/LOCI/mQTTDevice/mQTTDevice.csproj",
   "expectedPackageFiles": [
@@ -115,10 +115,7 @@
     "/home/kilian/.nuget/packages/system.threading.timer/4.3.0/system.threading.timer.4.3.0.nupkg.sha512",
     "/home/kilian/.nuget/packages/system.xml.readerwriter/4.3.0/system.xml.readerwriter.4.3.0.nupkg.sha512",
     "/home/kilian/.nuget/packages/system.xml.xdocument/4.3.0/system.xml.xdocument.4.3.0.nupkg.sha512",
-    "/home/kilian/.nuget/packages/windowsazure.storage/9.3.2/windowsazure.storage.9.3.2.nupkg.sha512",
-    "/home/kilian/.nuget/packages/microsoft.netcore.app.ref/5.0.0/microsoft.netcore.app.ref.5.0.0.nupkg.sha512",
-    "/home/kilian/.nuget/packages/microsoft.aspnetcore.app.ref/5.0.0/microsoft.aspnetcore.app.ref.5.0.0.nupkg.sha512",
-    "/home/kilian/.nuget/packages/microsoft.netcore.app.host.linux-x64/5.0.13/microsoft.netcore.app.host.linux-x64.5.0.13.nupkg.sha512"
+    "/home/kilian/.nuget/packages/windowsazure.storage/9.3.2/windowsazure.storage.9.3.2.nupkg.sha512"
   ],
   "logs": []
 }
