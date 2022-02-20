@@ -1495,7 +1495,7 @@ def nothing(x):
     pass
 
 # Initializing the webcam feed.
-frame = cv2.imread('test_data/newfigure.jpg')
+frame = cv2.imread('test_data/fourpersonTransform.png')
 
 # Create a window named trackbars.
 cv2.namedWindow("Trackbars")

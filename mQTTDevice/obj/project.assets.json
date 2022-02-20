@@ -6468,11 +6468,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/kilian/Desktop/LOCI/mQTTDevice/mQTTDevice.csproj",
+      "projectUniqueName": "/home/kilian/Desktop/extra_project/LOCI/mQTTDevice/mQTTDevice.csproj",
       "projectName": "mQTTDevice",
-      "projectPath": "/home/kilian/Desktop/LOCI/mQTTDevice/mQTTDevice.csproj",
+      "projectPath": "/home/kilian/Desktop/extra_project/LOCI/mQTTDevice/mQTTDevice.csproj",
       "packagesPath": "/home/kilian/.nuget/packages/",
-      "outputPath": "/home/kilian/Desktop/LOCI/mQTTDevice/obj/",
+      "outputPath": "/home/kilian/Desktop/extra_project/LOCI/mQTTDevice/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/kilian/.nuget/NuGet/NuGet.Config"
@@ -6519,7 +6519,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/snap/dotnet-sdk/152/sdk/6.0.101/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/snap/dotnet-sdk/155/sdk/6.0.102/RuntimeIdentifierGraph.json"
       }
     }
   }

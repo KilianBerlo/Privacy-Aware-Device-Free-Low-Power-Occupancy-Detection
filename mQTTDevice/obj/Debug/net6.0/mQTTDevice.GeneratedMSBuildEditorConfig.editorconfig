@@ -7,4 +7,4 @@ build_property.InvariantGlobalization =
 build_property.PlatformNeutralAssembly = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = mQTTDevice
-build_property.ProjectDir = /home/kilian/Desktop/LOCI/mQTTDevice/
+build_property.ProjectDir = /home/kilian/Desktop/extra_project/LOCI/mQTTDevice/

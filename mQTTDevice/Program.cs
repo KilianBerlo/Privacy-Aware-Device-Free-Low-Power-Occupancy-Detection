@@ -6,6 +6,7 @@
 
 using Microsoft.Azure.Devices.Client;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -14,6 +15,19 @@ using System.Threading.Tasks;
 
 namespace mQTTDevice
 {
+    public class deviceProps{
+        public int accuracy { get; set; }
+        public string battery { get; set; }
+        public string client { get; set; }
+        public string color { get; set; }
+        public string dateTime { get; set; }
+    }
+
+    public class dataset{
+        public string type { get; set; }
+        public double[] coordinates { get; set; }
+    }
+
     /// <summary>
     /// This sample illustrates the very basics of a device app sending telemetry. For a more comprehensive device app sample, please see
     /// <see href="https://github.com/Azure-Samples/azure-iot-samples-csharp/tree/main/iot-hub/Samples/device/DeviceReconnectionSample"/>.
@@ -95,22 +109,26 @@ namespace mQTTDevice
         // Async method to send simulated telemetry
         private static async Task SendDeviceToCloudMessagesAsync(CancellationToken ct)
         {
-            // Initial telemetry values
-            double minTemperature = 20;
-            double minHumidity = 60;
-            var rand = new Random();
+            // // Initial telemetry values
+            // double minTemperature = 20;
+            // double minHumidity = 60;
+            // var rand = new Random();
 
             while (!ct.IsCancellationRequested)
             {
-                double currentTemperature = minTemperature + rand.NextDouble() * 15;
-                double currentHumidity = minHumidity + rand.NextDouble() * 20;
+                double currentTemperature = 35;//minTemperature + rand.NextDouble() * 15;
+                // double currentHumidity = minHumidity + rand.NextDouble() * 20;
 
                 // Create JSON message
                 string messageBody = JsonSerializer.Serialize(
                     new
                     {
-                        temperature = currentTemperature,
-                        humidity = currentHumidity,
+                        type = "Feature",
+                        id = "54:ee:75:57:b8:59",
+                        properties = new deviceProps {accuracy = 100, battery = "85%", client = "TUDelft", color = "red", dateTime = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ")},
+                        geometry = new dataset {type = "Point", coordinates = new[] {5.458188056945801, 51.41125257942182 }}
+                        // temperature = currentTemperature,
+                        // humidity = currentHumidity
                     });
                 using var message = new Message(Encoding.ASCII.GetBytes(messageBody))
                 {
