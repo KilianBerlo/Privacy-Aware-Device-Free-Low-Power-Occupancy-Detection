@@ -26,3 +26,5 @@ class person_detection:
         
         if waitkey == 0:
             cv2.destroyAllWindows()
+        
+        return len(contours)

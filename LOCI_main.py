@@ -8,6 +8,10 @@ import heatmap_visualisations as hv
 import person_detection as pd
 from time import sleep
 import matplotlib.pyplot as plt
+import asyncio
+from azure.iot.device.aio import IoTHubDeviceClient
+from datetime import datetime
+from azure.iot.device import Message
 
 # Set to True if serial data is used, set to False if database data is used
 LIVE = True
@@ -24,6 +28,12 @@ COLS = 32
 FIGURE = 'test_data/newfigure.jpg'
 FIGDATA = 'test_data/newfigure.txt'
 FIGTEMP = 'test_data/figureTemp.txt'
+CONNECTION_STRING = "HostName=geojson-ticket-hub.azure-devices.net;DeviceId=tudelft_device001;SharedAccessKey=6dCj+Nr3TqWAuuJ303DbpEqOheoXWNKi60ixbG3Dx2Q="
+
+#JSON data format
+PROPERTY_TXT = '{{"client":"{client}","accuracy":{accuracy},"battery":"{battery}","color":"{color}","dateTime":"{dateTime}"}}'
+GEOM_TXT = '{{"type":"{typeGeom}","coordinates":{coordinates}}}'
+MSG_TXT = '{{"type":"{type}","id":"{id}","properties":{properties},"geometry":{geometry}}}' 
 
 class Base():
     def __init__(self):
@@ -243,7 +253,36 @@ class Base():
         framefile = open(FIGTEMP, 'w')
         framefile.write("temperature data: " + str(self._imData) + "\n")
         framefile.close()
-          
+
+    async def run_telemetry(self, client, fig, im, bg):
+        # This sample will send temperature telemetry every second
+        print("IoT Hub device sending periodic messages")
+        await client.connect()
+
+        for i in range(50):
+            if CONTOUR == True:
+                b.calculate_PixTemp()
+                im.set_data(np.subtract(self._imData, bg))
+                plt.savefig(FIGURE, bbox_inches='tight',pad_inches = 0)
+                # Build the message with simulated telemetry values.
+                dateTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+01:00")
+                personCount = pd.person_detection(FIGURE).contour_detection(1)
+
+                properties = PROPERTY_TXT.format(client="TUDelft", accuracy=personCount, battery="89%", color="black", dateTime=dateTime)
+                geometry = GEOM_TXT.format(typeGeom="Point", coordinates=[52.011578, 4.357068])
+                msg_txt_formatted = MSG_TXT.format(type="feature", id="54ee7557b859", properties=properties, geometry=geometry)
+                # msg_txt_formatted = MSG_TXT2.format(acc=accuracy, bat=battery, col=color, idd=id, lat=coordinates[0], long=coordinates[1])
+                message = Message(msg_txt_formatted)
+
+                # Send the message.
+                print("Sending message: {}".format(message))
+                await client.send_message(message)
+                print("Message successfully sent")
+            else:
+                b.calculate_PixTemp()
+                im.set_data(np.subtract(self._imData, bg))
+                fig.canvas.flush_events()
+
     def main(self):
         # Not needed but gives me some time to get ready after clicking start :')
         sleep(2)
@@ -262,20 +301,24 @@ class Base():
 
         self.calculate_PixTemp()
 
-        ## VISUALISATION ##
+
+        # Instantiate the client
+        client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING)
+
+        loop = asyncio.get_event_loop()
+
         if VID == True:
-            fig, im, bg = hv.heatmap_visualisations(self._imData).show_HeatmapVid()
-            if CONTOUR == True:
-                for i in range(50):
-                    self.calculate_PixTemp()
-                    im.set_data(np.subtract(self._imData, bg))
-                    plt.savefig(FIGURE, bbox_inches='tight',pad_inches = 0)
-                    pd.person_detection(FIGURE).contour_detection(1)
-            else:
-                for i in range(50):
-                    self.calculate_PixTemp()
-                    im.set_data(np.subtract(self._imData, bg))
-                    fig.canvas.flush_events()
+            try:
+                # Run the sample in the event loop
+                fig, im, bg = hv.heatmap_visualisations(self._imData).show_HeatmapVid()
+                loop.run_until_complete(self.run_telemetry(client, fig, im, bg))
+            except KeyboardInterrupt:
+                print("IoTHubClient sample stopped by user")
+            finally:
+                # Upon application exit, shut down the client
+                print("Shutting down IoTHubClient")
+                loop.run_until_complete(client.shutdown())
+                loop.close()
         else:
             hv.heatmap_visualisations(self._imData).show_HeatmapImg()
             plt.savefig(FIGURE, bbox_inches='tight',pad_inches = 0)

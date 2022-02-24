@@ -15,9 +15,9 @@ battery = "89%"
 clientel = "TUDelft"
 color = "black"
 typeGeom = "Point"
-coordinates = [51.43, 24.31]
+coordinates = [52.011578, 4.357068]
 # MSG_TXT2 = '{{"Accuracy": {acc}, "Battery": {bat}, "Color": {col}, "id": {idd}, "Latitude": {lat}, "Longitude": {long}}}'
-PROPERTY_TXT = '{{"client":"{client}","accuracy":{accuracy},"battery":"{battery}","color":"{color}","dateTime":{dateTime}}}'
+PROPERTY_TXT = '{{"client":"{client}","accuracy":{accuracy},"battery":"{battery}","color":"{color}","dateTime":"{dateTime}"}}'
 GEOM_TXT = '{{"type":"{typeGeom}","coordinates":{coordinates}}}'
 MSG_TXT = '{{"type":"{type}","id":"{id}","properties":{properties},"geometry":{geometry}}}' 
 
@@ -31,7 +31,7 @@ async def run_telemetry_sample(client):
         # Build the message with simulated telemetry values.
         dateTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+01:00")
 
-        properties = PROPERTY_TXT.format(accuracy=accuracy, battery=battery, client=clientel, color=color, dateTime=dateTime)
+        properties = PROPERTY_TXT.format(client=clientel, accuracy=accuracy, battery=battery, color=color, dateTime=dateTime)
         geometry = GEOM_TXT.format(typeGeom=typeGeom, coordinates=coordinates)
 
         msg_txt_formatted = MSG_TXT.format(type=type, id=id, properties=properties, geometry=geometry)
