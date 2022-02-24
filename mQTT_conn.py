@@ -8,18 +8,18 @@ from azure.iot.device import Message
 CONNECTION_STRING = "HostName=geojson-ticket-hub.azure-devices.net;DeviceId=tudelft_device001;SharedAccessKey=6dCj+Nr3TqWAuuJ303DbpEqOheoXWNKi60ixbG3Dx2Q="
 
 # Define the JSON message to send to IoT Hub.
-type = "Feature"
-id = "54:ee:75:57:b8:59"
-accuracy = 100
-battery = "85%"
+type = "feature"
+id = "54ee7557b859"
+accuracy = 74
+battery = "89%"
 clientel = "TUDelft"
-color = "red"
+color = "black"
 typeGeom = "Point"
 coordinates = [51.43, 24.31]
 # MSG_TXT2 = '{{"Accuracy": {acc}, "Battery": {bat}, "Color": {col}, "id": {idd}, "Latitude": {lat}, "Longitude": {long}}}'
-PROPERTY_TXT = '{{"accuracy": {accuracy}, "battery": {battery}, "client": {client}, "color": {color}, "dateTime": {dateTime}}}'
-GEOM_TXT = '{{"type": {typeGeom}, "coordinates": {coordinates}}}'
-MSG_TXT = '{{"type": {type},"id": {id}, "properties": {properties}, "geometry": {geometry}}}' 
+PROPERTY_TXT = '{{"client":"{client}","accuracy":{accuracy},"battery":"{battery}","color":"{color}","dateTime":{dateTime}}}'
+GEOM_TXT = '{{"type":"{typeGeom}","coordinates":{coordinates}}}'
+MSG_TXT = '{{"type":"{type}","id":"{id}","properties":{properties},"geometry":{geometry}}}' 
 
 async def run_telemetry_sample(client):
     # This sample will send temperature telemetry every second
@@ -29,7 +29,7 @@ async def run_telemetry_sample(client):
 
     while True:
         # Build the message with simulated telemetry values.
-        dateTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        dateTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+01:00")
 
         properties = PROPERTY_TXT.format(accuracy=accuracy, battery=battery, client=clientel, color=color, dateTime=dateTime)
         geometry = GEOM_TXT.format(typeGeom=typeGeom, coordinates=coordinates)

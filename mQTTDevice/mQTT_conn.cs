@@ -13,9 +13,9 @@ using System.Threading.Tasks;
 namespace mQTTDevice
 {
     public class deviceProps{
+        public string client { get; set; }
         public int accuracy { get; set; }
         public string battery { get; set; }
-        public string client { get; set; }
         public string color { get; set; }
         public string dateTime { get; set; }
     }
@@ -100,10 +100,10 @@ namespace mQTTDevice
                 string messageBody = JsonSerializer.Serialize(
                     new
                     {
-                        type = "Feature",
-                        id = "54:ee:75:57:b8:59",
-                        properties = new deviceProps {accuracy = 100, battery = "85%", client = "TUDelft", color = "red", dateTime = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ")},
-                        geometry = new dataset {type = "Point", coordinates = new[] {5.458188056945801, 51.41125257942182 }}
+                        type = "feature",
+                        id = "54ee7557b859",
+                        properties = new deviceProps {client = "TUDelft", accuracy = 74, battery = "89%", color = "black", dateTime = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss+01:00")},
+                        geometry = new dataset {type = "Point", coordinates = new[] { 51.43, 24.31 }}
                     });
                 using var message = new Message(Encoding.ASCII.GetBytes(messageBody))
                 {
