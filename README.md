@@ -1,6 +1,6 @@
 # Privacy-aware, Low-power, Occupancy detection of Multiple People using a Thermophile Sensor
 
-<video width="320" height="240" autoplay muted loop center>
+<video width="320" height="240" control autoplay muted loop center>
   <source src="./reference_material/ET4399-demo1.mp4" type="video/mp4">
 </video>
 
