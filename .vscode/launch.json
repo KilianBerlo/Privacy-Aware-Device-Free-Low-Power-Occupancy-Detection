@@ -20,9 +20,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/mQTTDevice/bin/Debug/net6.0/mQTTDevice.dll",
+            "program": "${workspaceFolder}/standalone_MQTT_IoT/bin/Debug/net6.0/mQTTDevice.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/mQTTDevice",
+            "cwd": "${workspaceFolder}/standalone_MQTT_IoT",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false

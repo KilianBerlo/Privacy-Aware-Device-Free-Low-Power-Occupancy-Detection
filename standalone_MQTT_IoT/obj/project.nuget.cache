@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "KiNZWpQBKVnZ66P1ijOvzfGDLoUlQngv7IAbDhEskvDvCx85K7JGeM8WFIalvQCvs4H96IXoDTUanbX73KvIig==",
+  "dgSpecHash": "gPwpuNC7KQav387HyTEvXhPHi2edLuOIB5YbhMD8SYtV3Py+xXcib27DfD3HEMRM2TJz4HT9AxbEqrd8A5fkNQ==",
   "success": true,
-  "projectFilePath": "/home/kilian/Desktop/extra_project/LOCI/mQTTDevice/mQTTDevice.csproj",
+  "projectFilePath": "/home/kilian/Desktop/extra_project/LOCI/standalone_MQTT_IoT/mQTTDevice.csproj",
   "expectedPackageFiles": [
     "/home/kilian/.nuget/packages/dotnetty.buffers/0.6.0/dotnetty.buffers.0.6.0.nupkg.sha512",
     "/home/kilian/.nuget/packages/dotnetty.codecs/0.6.0/dotnetty.codecs.0.6.0.nupkg.sha512",

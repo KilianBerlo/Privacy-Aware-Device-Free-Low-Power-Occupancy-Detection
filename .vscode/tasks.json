@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/mQTTDevice/mQTTDevice.csproj",
+                "${workspaceFolder}/standalone_MQTT_IoT/mQTTDevice.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/mQTTDevice/mQTTDevice.csproj",
+                "${workspaceFolder}/standalone_MQTT_IoT/mQTTDevice.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/mQTTDevice/mQTTDevice.csproj"
+                "${workspaceFolder}/standalone_MQTT_IoT/mQTTDevice.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

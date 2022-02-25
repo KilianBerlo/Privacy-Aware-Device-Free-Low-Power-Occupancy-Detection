@@ -6,20 +6,19 @@ from datetime import datetime
 from azure.iot.device.aio import IoTHubDeviceClient
 from azure.iot.device import Message
 
-## Connection string needed to connect and authenticate to the IoT Hub (Azure IoT, but provided by try.IoT)
-CONNECTION_STRING = "HostName=geojson-ticket-hub.azure-devices.net;DeviceId=tudelft_device001;SharedAccessKey=6dCj+Nr3TqWAuuJ303DbpEqOheoXWNKi60ixbG3Dx2Q="
-# ## A second option, or in case of two devices:
-# CONNECTION_STRING = "HostName=geojson-ticket-hub.azure-devices.net;DeviceId=tudelft_device002;SharedAccessKey=Su0mJ00EyxwIDGsDfaDIPPHXYO8G8CvSpUdgXSkDmSk="
+## Connection string needed to connect and authenticate to the IoT Hub
+## DUMMY VARIABLE, STILL TO BE CORRECTLY SET
+CONNECTION_STRING = "HostName=geojson-ticket-hub.azure-devices.net;DeviceId=device_ID;SharedAccessKey=6dCj+Nr3TqWAuuJ303DbpEdi4KROWNKi60ixbG3Dx2Q="
 
 ## Define the JSON message contents to send to the IoT Hub
 type = "feature"
-id = "54ee7557b859"
+id = "110AF1844EA0"
 accuracy = 74
 battery = "89%"
-clientel = "TUDelft"
+clientel = "Embassy"
 color = "black"
 typeGeom = "Point"
-coordinates = [52.011578, 4.357068]
+coordinates = [78.011578, 34.357068]
 
 ## JSON data format for messaging to the IoT Hub
 PROPERTY_TXT = '{{"client":"{client}","accuracy":{accuracy},"battery":"{battery}","color":"{color}","dateTime":"{dateTime}"}}'

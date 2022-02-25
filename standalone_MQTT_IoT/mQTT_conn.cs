@@ -30,10 +30,9 @@ namespace mQTTDevice
         private static DeviceClient s_deviceClient;
         private static readonly TransportType s_transportType = TransportType.Mqtt;
 
-        // The device connection string to authenticate the device with your IoT hub.
-        private static string s_connectionString = "HostName=geojson-ticket-hub.azure-devices.net;DeviceId=tudelft_device001;SharedAccessKey=6dCj+Nr3TqWAuuJ303DbpEqOheoXWNKi60ixbG3Dx2Q=";
-        // // A second option, or in case of two devices:
-        // private static string s_connectionString = "HostName=geojson-ticket-hub.azure-devices.net;DeviceId=tudelft_device002;SharedAccessKey=Su0mJ00EyxwIDGsDfaDIPPHXYO8G8CvSpUdgXSkDmSk="
+        // Connection string needed to connect and authenticate to the IoT Hub
+        // DUMMY VARIABLE, STILL TO BE CORRECTLY SET
+        private static string s_connectionString = "HostName=geojson-ticket-hub.azure-devices.net;DeviceId=device_ID;SharedAccessKey=6dCj+Nr3TqWAuuJ303DbpEdi4KROWNKi60ixbG3Dx2Q=";
 
         /// <summary>
         /// Async method to connect to the IoT Hub using the MQTT protocol, send messages and then close the connection again
@@ -114,9 +113,9 @@ namespace mQTTDevice
                     new
                     {
                         type = "feature",
-                        id = "54ee7557b859",
-                        properties = new deviceProps {client = "TUDelft", accuracy = 74, battery = "89%", color = "black", dateTime = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss+01:00")},
-                        geometry = new deviceGeom {type = "Point", coordinates = new[] { 51.43, 24.31 }}
+                        id = "110AF1844EA0",
+                        properties = new deviceProps {client = "Embassy", accuracy = 74, battery = "89%", color = "black", dateTime = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss+01:00")},
+                        geometry = new deviceGeom {type = "Point", coordinates = new[] { 78.011578, 34.357068 }}
                     });
                 using var message = new Message(Encoding.ASCII.GetBytes(messageBody))
                 {

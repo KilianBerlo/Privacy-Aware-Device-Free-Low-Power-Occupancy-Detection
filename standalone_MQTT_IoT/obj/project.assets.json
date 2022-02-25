@@ -6468,11 +6468,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/kilian/Desktop/extra_project/LOCI/mQTTDevice/mQTTDevice.csproj",
+      "projectUniqueName": "/home/kilian/Desktop/extra_project/LOCI/standalone_MQTT_IoT/mQTTDevice.csproj",
       "projectName": "mQTTDevice",
-      "projectPath": "/home/kilian/Desktop/extra_project/LOCI/mQTTDevice/mQTTDevice.csproj",
+      "projectPath": "/home/kilian/Desktop/extra_project/LOCI/standalone_MQTT_IoT/mQTTDevice.csproj",
       "packagesPath": "/home/kilian/.nuget/packages/",
-      "outputPath": "/home/kilian/Desktop/extra_project/LOCI/mQTTDevice/obj/",
+      "outputPath": "/home/kilian/Desktop/extra_project/LOCI/standalone_MQTT_IoT/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/kilian/.nuget/NuGet/NuGet.Config"

@@ -3,7 +3,9 @@
 Privacy-aware, low-power, and device-free indoor occupancy detection is highly sought after in order to enable smart environments. IR-based solutions seem to obey to these demands, however, are quite limited in terms of real-life application due to several obstacles. So, another, more appropriate solution, is to be found. For this, Ranga Rao and Sujay from the Networked and Embedded Systems group of the TU Delft already developed a device that integrates, among others, a thermophile sensor. For me, it is now the task to explore the sensor usage possibilities. This is done so I can get more familiar with three topics:
 1. Acquiring sensor data appropriately
 2. Applying computer vision techniques to detect people based on IR information
-3. Sending information extracted from the sensor, using the MQTT protocol, to the server.
+3. Sending information extracted from the sensor, using the MQTT protocol, to an Azure IoT Hub.
+
+For the MQTT connection with the IoT Hub, also a separate code is created for testing and can be found in the folder [standalone_MQTT_IoT](standalone_MQTT_IoT)
 
 
 ## Hardware:
@@ -17,13 +19,11 @@ Hardware used in the project:
 ## Technologies:
 Languages, libraries and versions used in the project:
 - Python 3.8 with libs asyncio, math, struct, and datetime
-- Microsoft .NET SDK 6.0
 - Serial 3.5
 - Numpy 1.22
 - Matplotlib 3.4.2
 - OpenCV 4.5.5
 - Azure IoT Python SDK v2
-- Azure IoT C SDK v1
 
 
 ## Launch
