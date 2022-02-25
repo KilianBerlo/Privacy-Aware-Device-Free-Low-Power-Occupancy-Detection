@@ -1465,105 +1465,105 @@ fourPerson1Temp = np.array([[16.81898544, 19.0787719, 18.90443746, 19.41112417, 
 , 21.57493346, 22.53638094]])
 
 ##########################DIFFERENT DETECTION TECHNIQUES#########################
-# img = cv2.imread('test_data/onePersonDel1.jpg')# Convert the BRG image to RGB
-# hsv_frame = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+img = cv2.imread('test_data/fourpersonTransform.png')# Convert the BRG image to RGB
+hsv_frame = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-# # Red color
-# low_red = np.array([0, 0, 240])
-# high_red = np.array([175, 255, 255])
-# red_mask = cv2.inRange(hsv_frame, low_red, high_red)
+# Red color
+low_red = np.array([26, 81, 240])
+high_red = np.array([175, 255, 255])
+red_mask = cv2.inRange(hsv_frame, low_red, high_red)
 
-# contours, hierarchy = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+contours, hierarchy = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
-# print("The Total Number of People in the Image = ")
-# ##command len used to calculate the number of contours/people in the image
-# print (str(len(contours)))
-# cv2.drawContours(img, contours, -1,(0,0,0),3)
+print("The Total Number of People in the Image = ")
+##command len used to calculate the number of contours/people in the image
+print (str(len(contours)))
+cv2.drawContours(img, contours, -1,(0,0,0),3)
 
-# cv2.imshow('Image', red_mask)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+cv2.imshow('Image', img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 
 
 #finding hsv range of target object(pen)
-import cv2
-import numpy as np
-import time
-# A required callback method that goes into the trackbar function.
-def nothing(x):
-    pass
+# import cv2
+# import numpy as np
+# import time
+# # A required callback method that goes into the trackbar function.
+# def nothing(x):
+#     pass
 
-# Initializing the webcam feed.
-frame = cv2.imread('test_data/fourpersonTransform.png')
+# # Initializing the webcam feed.
+# frame = cv2.imread('test_data/fourpersonTransform.png')
 
-# Create a window named trackbars.
-cv2.namedWindow("Trackbars")
+# # Create a window named trackbars.
+# cv2.namedWindow("Trackbars")
 
-# Now create 6 trackbars that will control the lower and upper range of 
-# H,S and V channels. The Arguments are like this: Name of trackbar, 
-# window name, range,callback function. For Hue the range is 0-179 and
-# for S,V its 0-255.
-cv2.createTrackbar("L - H", "Trackbars", 0, 179, nothing)
-cv2.createTrackbar("L - S", "Trackbars", 0, 255, nothing)
-cv2.createTrackbar("L - V", "Trackbars", 0, 255, nothing)
-cv2.createTrackbar("U - H", "Trackbars", 179, 179, nothing)
-cv2.createTrackbar("U - S", "Trackbars", 255, 255, nothing)
-cv2.createTrackbar("U - V", "Trackbars", 255, 255, nothing)
+# # Now create 6 trackbars that will control the lower and upper range of 
+# # H,S and V channels. The Arguments are like this: Name of trackbar, 
+# # window name, range,callback function. For Hue the range is 0-179 and
+# # for S,V its 0-255.
+# cv2.createTrackbar("L - H", "Trackbars", 0, 179, nothing)
+# cv2.createTrackbar("L - S", "Trackbars", 0, 255, nothing)
+# cv2.createTrackbar("L - V", "Trackbars", 0, 255, nothing)
+# cv2.createTrackbar("U - H", "Trackbars", 179, 179, nothing)
+# cv2.createTrackbar("U - S", "Trackbars", 255, 255, nothing)
+# cv2.createTrackbar("U - V", "Trackbars", 255, 255, nothing)
  
-while True:
+# while True:
          
-    # Convert the BGR image to HSV image.
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+#     # Convert the BGR image to HSV image.
+#     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     
-    # Get the new values of the trackbar in real time as the user changes 
-    # them
-    l_h = cv2.getTrackbarPos("L - H", "Trackbars")
-    l_s = cv2.getTrackbarPos("L - S", "Trackbars")
-    l_v = cv2.getTrackbarPos("L - V", "Trackbars")
-    u_h = cv2.getTrackbarPos("U - H", "Trackbars")
-    u_s = cv2.getTrackbarPos("U - S", "Trackbars")
-    u_v = cv2.getTrackbarPos("U - V", "Trackbars")
+#     # Get the new values of the trackbar in real time as the user changes 
+#     # them
+#     l_h = cv2.getTrackbarPos("L - H", "Trackbars")
+#     l_s = cv2.getTrackbarPos("L - S", "Trackbars")
+#     l_v = cv2.getTrackbarPos("L - V", "Trackbars")
+#     u_h = cv2.getTrackbarPos("U - H", "Trackbars")
+#     u_s = cv2.getTrackbarPos("U - S", "Trackbars")
+#     u_v = cv2.getTrackbarPos("U - V", "Trackbars")
  
-    # Set the lower and upper HSV range according to the value selected
-    # by the trackbar
-    lower_range = np.array([l_h, l_s, l_v])
-    upper_range = np.array([u_h, u_s, u_v])
+#     # Set the lower and upper HSV range according to the value selected
+#     # by the trackbar
+#     lower_range = np.array([l_h, l_s, l_v])
+#     upper_range = np.array([u_h, u_s, u_v])
     
-    # Filter the image and get the binary mask, where white represents 
-    # your target color
-    mask = cv2.inRange(hsv, lower_range, upper_range)
+#     # Filter the image and get the binary mask, where white represents 
+#     # your target color
+#     mask = cv2.inRange(hsv, lower_range, upper_range)
  
-    # You can also visualize the real part of the target color (Optional)
-    res = cv2.bitwise_and(frame, frame, mask=mask)
+#     # You can also visualize the real part of the target color (Optional)
+#     res = cv2.bitwise_and(frame, frame, mask=mask)
     
-    # Converting the binary mask to 3 channel image, this is just so 
-    # we can stack it with the others
-    mask_3 = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+#     # Converting the binary mask to 3 channel image, this is just so 
+#     # we can stack it with the others
+#     mask_3 = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
     
-    # stack the mask, orginal frame and the filtered result
-    stacked = np.hstack((mask_3,frame,res))
+#     # stack the mask, orginal frame and the filtered result
+#     stacked = np.hstack((mask_3,frame,res))
     
-    # Show this stacked frame at 40% of the size.
-    cv2.imshow('Trackbars',cv2.resize(stacked,None,fx=0.4,fy=0.4))
+#     # Show this stacked frame at 40% of the size.
+#     cv2.imshow('Trackbars',cv2.resize(stacked,None,fx=0.4,fy=0.4))
     
-    # If the user presses ESC then exit the program
-    key = cv2.waitKey(1)
-    if key == 27:
-        break
+#     # If the user presses ESC then exit the program
+#     key = cv2.waitKey(1)
+#     if key == 27:
+#         break
     
-    # If the user presses `s` then print this array.
-    if key == ord('s'):
+#     # If the user presses `s` then print this array.
+#     if key == ord('s'):
         
-        thearray = [[l_h,l_s,l_v],[u_h, u_s, u_v]]
-        print(thearray)
+#         thearray = [[l_h,l_s,l_v],[u_h, u_s, u_v]]
+#         print(thearray)
         
-        # Also save this array as penval.npy
-        np.save('hsv_value',thearray)
-        break
+#         # Also save this array as penval.npy
+#         np.save('hsv_value',thearray)
+#         break
     
-# Release the camera & destroy the windows.    
-cv2.destroyAllWindows()
+# # Release the camera & destroy the windows.    
+# cv2.destroyAllWindows()
 
 
 ###########################COMPARISON##########################

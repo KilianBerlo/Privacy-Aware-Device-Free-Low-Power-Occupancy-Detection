@@ -1,16 +1,34 @@
-## All parameters are extracted according to the instructions in chapter 11 of the MLX90640-Datasheet-Melexis: 
+## Almost all parameters are extracted according to the instructions in chapter 11 of the MLX90640-Datasheet-Melexis: 
 ## https://www.mouser.com/datasheet/2/734/MLX90640-Datasheet-Melexis-1324357.pdf
 
 import math as m
 
-ROWS = 24
-COLS = 32
-
 class calibration_restoration_EEPROM:
-    def __init__(self, mlxData):
+    """
+    Class that restores the calibration data of the EEPROM to usable values
+    """
+    def __init__(self, mlxData, rows, cols):
+        """
+        Constructor for the class restoring the calibration data of the EEPROM to usable values
+        
+        Parameters:
+            mlxData (np.array): Uncalibrated EEPROM Hex data obtained in the read_EEPROM() function of the Base() class
+            rows (int): The number of rows of a frame from the sensor
+            cols (int): The number of collumns of a frame from the sensor
+        """        
         self._mlxData = mlxData
+        self._rows = rows
+        self._cols = cols
     
+
     def extractVDDParams(self):
+        """
+        Function to calculate the VDD parameters of the sensor
+        
+        Returns:
+            kVdd (float): Kvdd parameter
+            vdd25 (int): VDD25 parameter
+        """  
         kVdd = (self._mlxData[51] & 65280) / 256
         if kVdd > 127:
             kVdd = kVdd - 256
@@ -21,7 +39,17 @@ class calibration_restoration_EEPROM:
 
         return kVdd, vdd25
 
+
     def extractPTATParams(self):
+        """
+        Function to calculate the PTAT (Proportional To Absolute Temperature) parameters of the sensor
+        
+        Returns:
+            kVPTAT (float): kVPTAT parameter
+            kTPTAT (float): kTPTAT parameter
+            vPTAT25 (int): vPTAT25 parameter
+            alphaPTAT (float): alphaPTAT parameter
+        """  
         kVPTAT = (self._mlxData[50] & 64512) / 1024
         if kVPTAT > 31: 
             kVPTAT -= 64
@@ -38,14 +66,28 @@ class calibration_restoration_EEPROM:
 
         return kVPTAT, kTPTAT, vPTAT25, alphaPTAT
 
+
     def extractGainCoef(self):
+        """
+        Function to calculate the gain coefficient of the sensor
+        
+        Returns:
+            gain (int): gain coefficient
+        """  
         gain = (self._mlxData[48])
         if gain > 32767:
             gain -= 65536
         
         return gain
 
+
     def extractTGCCoef(self):
+        """
+        Function to calculate the TGC coefficient of the sensor
+        
+        Returns:
+            tgc (float): TGC coefficient
+        """  
         tgc = self._mlxData[60] & 255
         if tgc > 127:
             tgc -= 256
@@ -53,11 +95,26 @@ class calibration_restoration_EEPROM:
 
         return tgc
 
+
     def extractResConCoef(self):
+        """
+        Function to calculate the resolution control coefficient of the sensor
+        
+        Returns:
+            resolution (float): resolution control coefficient
+        """  
         resolution = (self._mlxData[56] & 12288) / 4096
+
         return resolution
     
+
     def extractKsTaCoef(self):
+        """
+        Function to calculate the KsTa coefficient of the sensor
+        
+        Returns:
+            ksTa (float): KsTa coefficient
+        """  
         ksTa = (self._mlxData[60] & 65280) / 256
         if ksTa > 127:
             ksTa -= 256
@@ -65,7 +122,14 @@ class calibration_restoration_EEPROM:
 
         return ksTa
 
+
     def extractKsToCoef(self):
+        """
+        Function to calculate the KsTo coefficient of the sensor
+        
+        Returns:
+            ksTo (list): List of the KsTo coeffiecients needed for the sensitivity correction for each temperature range
+        """  
         ksToScale = (self._mlxData[63] & 15) + 8
 
         ksTo = []
@@ -81,7 +145,14 @@ class calibration_restoration_EEPROM:
             
         return ksTo
 
+
     def extractCornerTemps(self):
+        """
+        Function to calculate the corner temperatures of the frame of the sensor
+        
+        Returns:
+            ct (list): List of the corner temperature values of each pixel
+        """  
         step = ((self._mlxData[63] & 12288) / 4096) * 10
 
         ct = []
@@ -92,7 +163,14 @@ class calibration_restoration_EEPROM:
 
         return ct
     
+
     def extractPixSens(self):
+        """
+        Function to calculate the sensitivity (alpha) of each pixel in the frame of the sensor
+        
+        Returns:
+            alpha (list): List of the sensitivity value of each pixel
+        """  
         aRef = self._mlxData[33]
         aScale = ((self._mlxData[32] & 61440) / 4096) + 30
         accScaleRow = (self._mlxData[32] & 3840) / 256
@@ -101,29 +179,29 @@ class calibration_restoration_EEPROM:
 
         accRow = []
         ## Range from 0 to 5 since six EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
-        for i in range(ROWS>>2): 
+        for i in range(self._rows>>2): 
             accRow.append(self._mlxData[34 + i] & 15)
             accRow.append((self._mlxData[34 + i] & 240) / 16)
             accRow.append((self._mlxData[34 + i] & 3840) / 256)
             accRow.append((self._mlxData[34 + i] & 61440) / 4096)
-        for i in range(ROWS):
+        for i in range(self._rows):
             if accRow[i] > 7:
                 accRow[i] -= 16
 
         accCol = []
         ## Range from 0 to 7 since eight EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
-        for j in range(COLS>>2): 
+        for j in range(self._cols>>2): 
             accCol.append(self._mlxData[40 + j] & 15)
             accCol.append((self._mlxData[40 + j] & 240) / 16)
             accCol.append((self._mlxData[40 + j] & 3840) / 256)
             accCol.append((self._mlxData[40 + j] & 61440) / 4096)
-        for j in range(COLS):
+        for j in range(self._cols):
             if accCol[j] > 7:
                 accCol[j] -= 16
 
         alpha = [] 
-        for i in range(ROWS):
-            for j in range(COLS):
+        for i in range(self._rows):
+            for j in range(self._cols):
                 l = 32 * i + j
                 alpha.append((self._mlxData[64 + l] & 1008) / 16)
                 if alpha[l] > 31:
@@ -132,7 +210,14 @@ class calibration_restoration_EEPROM:
 
         return alpha
  
+
     def extractPixOff(self):
+        """
+        Function to calculate the offset of each pixel in the frame of the sensor
+        
+        Returns:
+            offset (list): List of the offset value of each pixel
+        """  
         oavg = self._mlxData[17]
         if oavg > 32767:
             oavg -= 65536
@@ -142,30 +227,30 @@ class calibration_restoration_EEPROM:
 
         occRow = []
         ## Range from 0 to 5 since six EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
-        for i in range(ROWS>>2): 
+        for i in range(self._rows>>2): 
             occRow.append(self._mlxData[18 + i] & 15)
             occRow.append((self._mlxData[18 + i] & 240) / 16)
             occRow.append((self._mlxData[18 + i] & 3840) / 256)
             occRow.append((self._mlxData[18 + i] & 61440) / 4096)
-        for i in range(ROWS):
+        for i in range(self._rows):
             if occRow[i] > 7:
                 occRow[i] -= 16
 
         occCol = []
         ## Range from 0 to 7 since eight EEPROM words contain all the data about the bit values of each ACCrow (table 9 and 10 from datasheet)
-        for j in range(COLS>>2): 
+        for j in range(self._cols>>2): 
             occCol.append(self._mlxData[24 + j] & 15)
             occCol.append((self._mlxData[24 + j] & 240) / 16)
             occCol.append((self._mlxData[24 + j] & 3840) / 256)
             occCol.append((self._mlxData[24 + j] & 61440) / 4096)
-        for j in range(COLS):
+        for j in range(self._cols):
             if occCol[j] > 7:
                 occCol[j] -= 16
 
         offset = []
-        for i in range(ROWS):
-            for j in range(COLS):
-                l = COLS * i + j
+        for i in range(self._rows):
+            for j in range(self._cols):
+                l = self._cols * i + j
                 offset.append((self._mlxData[64 + l] & 64512) / 1024)
                 if offset[l] > 31:
                     offset[l] -= 64
@@ -173,7 +258,14 @@ class calibration_restoration_EEPROM:
 
         return offset
 
+
     def extractKtaCoef(self):
+        """
+        Function to calculate the Kta coefficient of each pixel in the frame of the sensor
+        
+        Returns:
+            kTa (list): List of the kTa coefficient of each pixel
+        """  
         kTa = []
         kTaRC = []
 
@@ -193,9 +285,9 @@ class calibration_restoration_EEPROM:
         if kTaRC[3] > 127:
             kTaRC[3] -= 256
         
-        for i in range(ROWS):
-            for j in range(COLS):
-                l = COLS * i + j
+        for i in range(self._rows):
+            for j in range(self._cols):
+                l = self._cols * i + j
                 split = 2 * (m.floor((l+1) / 32) - m.floor((l+1) / 64) * 2) + ((l+1) % 2)
 
                 kTa.append((self._mlxData[64 + l] & 14) / 2)
@@ -206,7 +298,14 @@ class calibration_restoration_EEPROM:
                 
         return kTa
 
+
     def extractKvCoef(self):
+        """
+        Function to calculate the Kv coefficient of each pixel in the frame of the sensor
+        
+        Returns:
+            kV (list): List of the Kv coefficient of each pixel
+        """  
         kV = []
         kVT = []
 
@@ -225,16 +324,24 @@ class calibration_restoration_EEPROM:
         if kVT[3] > 7:
             kVT[3] -= 16
 
-        for i in range(ROWS):
-            for j in range(COLS):
-                l = COLS * i + j
+        for i in range(self._rows):
+            for j in range(self._cols):
+                l = self._cols * i + j
                 split = 2 * (m.floor((l+1) / 32) - m.floor((l+1) / 64) * 2) + ((l+1) % 2)
                 
                 kV.append(kVT[split] / pow(2, kVScale))
                 
         return kV
     
+
     def extractComPixSens(self):
+        """
+        Function to calculate the compensation pixel sensitivity (alpha) of both subpages in the frame of the sensor
+        
+        Returns:
+            offsetCPSub0 (int): Compensation pixel sensivity of subpage 0
+            offsetCPSub1 (int): Compensation pixel sensivity of subpage 1
+        """  
         aScaleCP = ((self._mlxData[31] & 61440) / 4096) + 27
         cpP1P0Ratio = (self._mlxData[57] & 64512) / 1024
         if cpP1P0Ratio > 31:
@@ -245,7 +352,15 @@ class calibration_restoration_EEPROM:
         
         return alphaCPSub0, alphaCPSub1
 
+
     def extractComPixOff(self):
+        """
+        Function to calculate the compensation pixel offset of both subpages in the frame of the sensor
+        
+        Returns:
+            offsetCPSub0 (int): Compensation pixel offset of subpage 0
+            offsetCPSub1 (int): Compensation pixel offset of subpage 1
+        """  
         offsetCPSub0 = self._mlxData[58] & 1023
         if offsetCPSub0 > 511:
             offsetCPSub0 -= 1024
@@ -256,7 +371,14 @@ class calibration_restoration_EEPROM:
 
         return offsetCPSub0, offsetCPSub1
 
+
     def extractKtaComPixCoef(self):
+        """
+        Function to calculate the Kta compensation pixel of the sensor
+        
+        Returns:
+            kTaCP (float): Kta compensation pixel
+        """  
         kTas1 = ((self._mlxData[56] & 240) / 16) + 8
         kTaCP = self._mlxData[59] & 255
         if kTaCP > 127:
@@ -265,7 +387,14 @@ class calibration_restoration_EEPROM:
 
         return kTaCP
 
+
     def extractKvComPixCoef(self):
+        """
+        Function to calculate the Kv compensation pixel of the sensor
+        
+        Returns:
+            kVCP (float): Kv compensation pixel
+        """  
         kVScale = (self._mlxData[56] & 3840) / 256
         kVCP = (self._mlxData[59] & 65280) / 256
         if kVCP > 127:
@@ -274,13 +403,29 @@ class calibration_restoration_EEPROM:
 
         return kVCP
 
+
     def extractCalMode(self):
+        """
+        Function to calculate the calibration mode of the sensor
+        
+        Returns:
+            calMode (int): Number associated with the calibration settings of the sensor
+        """  
         calMode = (self._mlxData[10] & 2048) / 16
         calMode = int(calMode) ^ 128
 
         return calMode
 
+
     def extractChessCorrCoef(self):
+        """
+        Function to calculate the correlation coefficients for the chess reading pattern of the sensor
+        
+        Returns:
+            ilChessC1 (float): Parameter used for the calculation of pixel temperatures in the chess reading pattern
+            ilChessC2 (float): Parameter used for the calculation of pixel temperatures in the chess reading pattern
+            ilChessC3 (float): Parameter used for the calculation of pixel temperatures in the chess reading pattern
+        """  
         ilChessC1 = self._mlxData[53] & 63
         if ilChessC1 > 31:
             ilChessC1 -= 64
@@ -298,7 +443,16 @@ class calibration_restoration_EEPROM:
 
         return ilChessC1, ilChessC2, ilChessC3
     
+
     def extractDeviatingPix(self): 
+        """
+        Function to calculate the number of deviating and broken pixels in the frame of the sensor
+        
+        Returns:
+            brokenPix (list): List of broken pixels
+            outlierPix (list): List of outlier pixels
+            warning (int): Warning number associated with specific error
+        """  
         pixCnt = 0
         brokenPixCnt = 0
         outlierPixCnt = 0
@@ -341,7 +495,18 @@ class calibration_restoration_EEPROM:
 
         return brokenPix, outlierPix, warning
 
+
     def _checkAdjacentPix(self, pix1, pix2):
+        """
+        Function that aids in the detection of deviating and broken pixels
+
+        Parameters:
+            pix1 (int): Pixel used for comparison
+            pix2 (int): Second pixel, to be compared with the pix1
+        
+        Returns:
+            result (int): Gives a warning if the difference between the pixels is between certain ranges
+        """  
         pixPosDif = pix1 - pix2
         if (pixPosDif > -34 and pixPosDif < -30) or (pixPosDif > -2 and pixPosDif < 2) or (pixPosDif > 30 and pixPosDif < 34):
             result = -6
