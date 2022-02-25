@@ -29,7 +29,7 @@ FIGURE = 'test_data/newfigure.jpg'
 FIGDATA = 'test_data/newfigure.txt'
 FIGTEMP = 'test_data/figureTemp.txt'
 
-## Connection string needed to connect to the IoT Hub (provided by try.IoT)
+## Connection string needed to connect and authenticate to the IoT Hub (Azure IoT, but provided by try.IoT)
 CONNECTION_STRING = "HostName=geojson-ticket-hub.azure-devices.net;DeviceId=tudelft_device001;SharedAccessKey=6dCj+Nr3TqWAuuJ303DbpEqOheoXWNKi60ixbG3Dx2Q="
 
 ## JSON data format for messaging to the IoT Hub
