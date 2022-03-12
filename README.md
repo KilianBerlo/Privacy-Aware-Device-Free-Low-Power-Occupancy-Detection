@@ -1,4 +1,4 @@
-# Privacy-aware, Low-power, Occupancy detection of Multiple People using a Thermophile Sensor
+# Privacy-aware, Device-free, Occupancy detection of Multiple People using a Thermophile Sensor
 ![gif](reference_material/ET4399-demo1.gif)
 Privacy-aware, low-power, and device-free indoor occupancy detection is highly sought after in order to enable smart environments. IR-based solutions seem to obey to these demands, however, are quite limited in terms of real-life application due to several obstacles. So, another, more appropriate solution, is to be found. For this, Ranga Rao and Sujay from the Networked and Embedded Systems group of the TU Delft already developed a device that integrates, among others, a thermophile sensor. For me, it is now the task to explore the sensor usage possibilities. This is done so I can get more familiar with three topics:
 1. Acquiring sensor data appropriately
