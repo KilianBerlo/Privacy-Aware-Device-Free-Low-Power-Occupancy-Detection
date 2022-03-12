@@ -44,4 +44,4 @@ The CONTOUR constant can be set to False if it is not desired that contours are 
 ## Contact
 Kilian van Berlo - S5436737 - k.vanberlo@student.tudelft.nl
 
-Project Link: https://github.com/KilianBerlo/LOCI
+Project Link: https://github.com/KilianBerlo/Privacy-Aware-Device-Free-Occupancy-Detection
