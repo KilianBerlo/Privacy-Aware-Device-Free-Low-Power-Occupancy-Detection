@@ -5,6 +5,8 @@ Examples on how to connect your device to an Azure IoT Hub using the MQTT protoc
 ## Technologies:
 Languages, libraries and versions used in the project:
 - Python 3.8 with libs asyncio and datetime
+- C
+- C#
 - Microsoft .NET SDK 6.0
 - Azure IoT Python SDK v2
 - Azure IoT C SDK v1
